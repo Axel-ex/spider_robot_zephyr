@@ -1,5 +1,0 @@
-CompileFlags:
-  Remove: [-mlongcalls, -fno-printf-return-value, -fno-reorder-functions, -fstrict-volatile-bitfields, -mlong-calls, -target, xtensa-esp32-elf]
-  Add: [-I/home/axch/zephyr-sdk-0.17.4/xtensa-espressif_esp32_zephyr-elf/xtensa-espressif_esp32_zephyr-elf/include]
-Diagnostics:
-  Suppress: [main_returns_nonint, drv_unsupported_opt_for_target, pp_file_not_found]
