@@ -1,0 +1,4 @@
+west:
+  command: /home/axch/zephyrproject/zephyr_venv/bin/west build -b esp32
+  topdir: /home/axch/zephyrproject
+  version: 1.4.0
