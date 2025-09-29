@@ -28,4 +28,5 @@ empty_file.o: /home/axch/zephyrproject/zephyr/misc/empty_file.c \
  /home/axch/zephyrproject/zephyr/include/zephyr/dt-bindings/input/input-event-codes.h \
  /home/axch/zephyrproject/zephyr/include/zephyr/dt-bindings/input/esp32-touch-sensor-input.h \
  /home/axch/zephyrproject/zephyr/dts/vendor/espressif/partitions_0x1000_amp.dtsi \
- /home/axch/zephyrproject/zephyr/dts/vendor/espressif/partitions_0x1000_amp_4M.dtsi
+ /home/axch/zephyrproject/zephyr/dts/vendor/espressif/partitions_0x1000_amp_4M.dtsi \
+ /home/axch/code/c++/embedded/spider_robot_zep/app.overlay

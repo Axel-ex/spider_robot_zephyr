@@ -32,343 +32,349 @@ if(NOT DEFINED CMAKE_CROSSCOMPILING)
   set(CMAKE_CROSSCOMPILING "TRUE")
 endif()
 
-# Set default install directory permissions.
+# Set path to fallback-tool for dependency-resolution.
 if(NOT DEFINED CMAKE_OBJDUMP)
   set(CMAKE_OBJDUMP "/home/axch/zephyr-sdk-0.17.4/xtensa-espressif_esp32_zephyr-elf/bin/xtensa-espressif_esp32_zephyr-elf-objdump")
 endif()
 
 if(NOT CMAKE_INSTALL_LOCAL_ONLY)
   # Include the install script for the subdirectory.
-  include("/home/axch/code/c++/embedded/zephyr_blinky/build/zephyr/arch/cmake_install.cmake")
+  include("/home/axch/code/c++/embedded/spider_robot_zep/build/zephyr/arch/cmake_install.cmake")
 endif()
 
 if(NOT CMAKE_INSTALL_LOCAL_ONLY)
   # Include the install script for the subdirectory.
-  include("/home/axch/code/c++/embedded/zephyr_blinky/build/zephyr/lib/cmake_install.cmake")
+  include("/home/axch/code/c++/embedded/spider_robot_zep/build/zephyr/lib/cmake_install.cmake")
 endif()
 
 if(NOT CMAKE_INSTALL_LOCAL_ONLY)
   # Include the install script for the subdirectory.
-  include("/home/axch/code/c++/embedded/zephyr_blinky/build/zephyr/soc/cmake_install.cmake")
+  include("/home/axch/code/c++/embedded/spider_robot_zep/build/zephyr/soc/cmake_install.cmake")
 endif()
 
 if(NOT CMAKE_INSTALL_LOCAL_ONLY)
   # Include the install script for the subdirectory.
-  include("/home/axch/code/c++/embedded/zephyr_blinky/build/zephyr/boards/cmake_install.cmake")
+  include("/home/axch/code/c++/embedded/spider_robot_zep/build/zephyr/boards/cmake_install.cmake")
 endif()
 
 if(NOT CMAKE_INSTALL_LOCAL_ONLY)
   # Include the install script for the subdirectory.
-  include("/home/axch/code/c++/embedded/zephyr_blinky/build/zephyr/subsys/cmake_install.cmake")
+  include("/home/axch/code/c++/embedded/spider_robot_zep/build/zephyr/subsys/cmake_install.cmake")
 endif()
 
 if(NOT CMAKE_INSTALL_LOCAL_ONLY)
   # Include the install script for the subdirectory.
-  include("/home/axch/code/c++/embedded/zephyr_blinky/build/zephyr/drivers/cmake_install.cmake")
+  include("/home/axch/code/c++/embedded/spider_robot_zep/build/zephyr/drivers/cmake_install.cmake")
 endif()
 
 if(NOT CMAKE_INSTALL_LOCAL_ONLY)
   # Include the install script for the subdirectory.
-  include("/home/axch/code/c++/embedded/zephyr_blinky/build/modules/acpica/cmake_install.cmake")
+  include("/home/axch/code/c++/embedded/spider_robot_zep/build/modules/acpica/cmake_install.cmake")
 endif()
 
 if(NOT CMAKE_INSTALL_LOCAL_ONLY)
   # Include the install script for the subdirectory.
-  include("/home/axch/code/c++/embedded/zephyr_blinky/build/modules/cmsis/cmake_install.cmake")
+  include("/home/axch/code/c++/embedded/spider_robot_zep/build/modules/cmsis/cmake_install.cmake")
 endif()
 
 if(NOT CMAKE_INSTALL_LOCAL_ONLY)
   # Include the install script for the subdirectory.
-  include("/home/axch/code/c++/embedded/zephyr_blinky/build/modules/cmsis-dsp/cmake_install.cmake")
+  include("/home/axch/code/c++/embedded/spider_robot_zep/build/modules/cmsis-dsp/cmake_install.cmake")
 endif()
 
 if(NOT CMAKE_INSTALL_LOCAL_ONLY)
   # Include the install script for the subdirectory.
-  include("/home/axch/code/c++/embedded/zephyr_blinky/build/modules/cmsis-nn/cmake_install.cmake")
+  include("/home/axch/code/c++/embedded/spider_robot_zep/build/modules/cmsis-nn/cmake_install.cmake")
 endif()
 
 if(NOT CMAKE_INSTALL_LOCAL_ONLY)
   # Include the install script for the subdirectory.
-  include("/home/axch/code/c++/embedded/zephyr_blinky/build/modules/cmsis_6/cmake_install.cmake")
+  include("/home/axch/code/c++/embedded/spider_robot_zep/build/modules/cmsis_6/cmake_install.cmake")
 endif()
 
 if(NOT CMAKE_INSTALL_LOCAL_ONLY)
   # Include the install script for the subdirectory.
-  include("/home/axch/code/c++/embedded/zephyr_blinky/build/modules/fatfs/cmake_install.cmake")
+  include("/home/axch/code/c++/embedded/spider_robot_zep/build/modules/fatfs/cmake_install.cmake")
 endif()
 
 if(NOT CMAKE_INSTALL_LOCAL_ONLY)
   # Include the install script for the subdirectory.
-  include("/home/axch/code/c++/embedded/zephyr_blinky/build/modules/adi/cmake_install.cmake")
+  include("/home/axch/code/c++/embedded/spider_robot_zep/build/modules/adi/cmake_install.cmake")
 endif()
 
 if(NOT CMAKE_INSTALL_LOCAL_ONLY)
   # Include the install script for the subdirectory.
-  include("/home/axch/code/c++/embedded/zephyr_blinky/build/modules/hal_afbr/cmake_install.cmake")
+  include("/home/axch/code/c++/embedded/spider_robot_zep/build/modules/hal_afbr/cmake_install.cmake")
 endif()
 
 if(NOT CMAKE_INSTALL_LOCAL_ONLY)
   # Include the install script for the subdirectory.
-  include("/home/axch/code/c++/embedded/zephyr_blinky/build/modules/hal_ambiq/cmake_install.cmake")
+  include("/home/axch/code/c++/embedded/spider_robot_zep/build/modules/hal_ambiq/cmake_install.cmake")
 endif()
 
 if(NOT CMAKE_INSTALL_LOCAL_ONLY)
   # Include the install script for the subdirectory.
-  include("/home/axch/code/c++/embedded/zephyr_blinky/build/modules/atmel/cmake_install.cmake")
+  include("/home/axch/code/c++/embedded/spider_robot_zep/build/modules/atmel/cmake_install.cmake")
 endif()
 
 if(NOT CMAKE_INSTALL_LOCAL_ONLY)
   # Include the install script for the subdirectory.
-  include("/home/axch/code/c++/embedded/zephyr_blinky/build/modules/hal_bouffalolab/cmake_install.cmake")
+  include("/home/axch/code/c++/embedded/spider_robot_zep/build/modules/hal_bouffalolab/cmake_install.cmake")
 endif()
 
 if(NOT CMAKE_INSTALL_LOCAL_ONLY)
   # Include the install script for the subdirectory.
-  include("/home/axch/code/c++/embedded/zephyr_blinky/build/modules/hal_espressif/cmake_install.cmake")
+  include("/home/axch/code/c++/embedded/spider_robot_zep/build/modules/hal_espressif/cmake_install.cmake")
 endif()
 
 if(NOT CMAKE_INSTALL_LOCAL_ONLY)
   # Include the install script for the subdirectory.
-  include("/home/axch/code/c++/embedded/zephyr_blinky/build/modules/hal_ethos_u/cmake_install.cmake")
+  include("/home/axch/code/c++/embedded/spider_robot_zep/build/modules/hal_ethos_u/cmake_install.cmake")
 endif()
 
 if(NOT CMAKE_INSTALL_LOCAL_ONLY)
   # Include the install script for the subdirectory.
-  include("/home/axch/code/c++/embedded/zephyr_blinky/build/modules/hal_gigadevice/cmake_install.cmake")
+  include("/home/axch/code/c++/embedded/spider_robot_zep/build/modules/hal_gigadevice/cmake_install.cmake")
 endif()
 
 if(NOT CMAKE_INSTALL_LOCAL_ONLY)
   # Include the install script for the subdirectory.
-  include("/home/axch/code/c++/embedded/zephyr_blinky/build/modules/hal_infineon/cmake_install.cmake")
+  include("/home/axch/code/c++/embedded/spider_robot_zep/build/modules/hal_infineon/cmake_install.cmake")
 endif()
 
 if(NOT CMAKE_INSTALL_LOCAL_ONLY)
   # Include the install script for the subdirectory.
-  include("/home/axch/code/c++/embedded/zephyr_blinky/build/modules/hal_intel/cmake_install.cmake")
+  include("/home/axch/code/c++/embedded/spider_robot_zep/build/modules/hal_intel/cmake_install.cmake")
 endif()
 
 if(NOT CMAKE_INSTALL_LOCAL_ONLY)
   # Include the install script for the subdirectory.
-  include("/home/axch/code/c++/embedded/zephyr_blinky/build/modules/microchip/cmake_install.cmake")
+  include("/home/axch/code/c++/embedded/spider_robot_zep/build/modules/microchip/cmake_install.cmake")
 endif()
 
 if(NOT CMAKE_INSTALL_LOCAL_ONLY)
   # Include the install script for the subdirectory.
-  include("/home/axch/code/c++/embedded/zephyr_blinky/build/modules/hal_nordic/cmake_install.cmake")
+  include("/home/axch/code/c++/embedded/spider_robot_zep/build/modules/hal_nordic/cmake_install.cmake")
 endif()
 
 if(NOT CMAKE_INSTALL_LOCAL_ONLY)
   # Include the install script for the subdirectory.
-  include("/home/axch/code/c++/embedded/zephyr_blinky/build/modules/nuvoton/cmake_install.cmake")
+  include("/home/axch/code/c++/embedded/spider_robot_zep/build/modules/nuvoton/cmake_install.cmake")
 endif()
 
 if(NOT CMAKE_INSTALL_LOCAL_ONLY)
   # Include the install script for the subdirectory.
-  include("/home/axch/code/c++/embedded/zephyr_blinky/build/modules/hal_nxp/cmake_install.cmake")
+  include("/home/axch/code/c++/embedded/spider_robot_zep/build/modules/hal_nxp/cmake_install.cmake")
 endif()
 
 if(NOT CMAKE_INSTALL_LOCAL_ONLY)
   # Include the install script for the subdirectory.
-  include("/home/axch/code/c++/embedded/zephyr_blinky/build/modules/openisa/cmake_install.cmake")
+  include("/home/axch/code/c++/embedded/spider_robot_zep/build/modules/openisa/cmake_install.cmake")
 endif()
 
 if(NOT CMAKE_INSTALL_LOCAL_ONLY)
   # Include the install script for the subdirectory.
-  include("/home/axch/code/c++/embedded/zephyr_blinky/build/modules/quicklogic/cmake_install.cmake")
+  include("/home/axch/code/c++/embedded/spider_robot_zep/build/modules/quicklogic/cmake_install.cmake")
 endif()
 
 if(NOT CMAKE_INSTALL_LOCAL_ONLY)
   # Include the install script for the subdirectory.
-  include("/home/axch/code/c++/embedded/zephyr_blinky/build/modules/hal_renesas/cmake_install.cmake")
+  include("/home/axch/code/c++/embedded/spider_robot_zep/build/modules/hal_renesas/cmake_install.cmake")
 endif()
 
 if(NOT CMAKE_INSTALL_LOCAL_ONLY)
   # Include the install script for the subdirectory.
-  include("/home/axch/code/c++/embedded/zephyr_blinky/build/modules/hal_rpi_pico/cmake_install.cmake")
+  include("/home/axch/code/c++/embedded/spider_robot_zep/build/modules/hal_rpi_pico/cmake_install.cmake")
 endif()
 
 if(NOT CMAKE_INSTALL_LOCAL_ONLY)
   # Include the install script for the subdirectory.
-  include("/home/axch/code/c++/embedded/zephyr_blinky/build/modules/hal_silabs/cmake_install.cmake")
+  include("/home/axch/code/c++/embedded/spider_robot_zep/build/modules/hal_silabs/cmake_install.cmake")
 endif()
 
 if(NOT CMAKE_INSTALL_LOCAL_ONLY)
   # Include the install script for the subdirectory.
-  include("/home/axch/code/c++/embedded/zephyr_blinky/build/modules/hal_st/cmake_install.cmake")
+  include("/home/axch/code/c++/embedded/spider_robot_zep/build/modules/hal_st/cmake_install.cmake")
 endif()
 
 if(NOT CMAKE_INSTALL_LOCAL_ONLY)
   # Include the install script for the subdirectory.
-  include("/home/axch/code/c++/embedded/zephyr_blinky/build/modules/hal_stm32/cmake_install.cmake")
+  include("/home/axch/code/c++/embedded/spider_robot_zep/build/modules/hal_stm32/cmake_install.cmake")
 endif()
 
 if(NOT CMAKE_INSTALL_LOCAL_ONLY)
   # Include the install script for the subdirectory.
-  include("/home/axch/code/c++/embedded/zephyr_blinky/build/modules/hal_tdk/cmake_install.cmake")
+  include("/home/axch/code/c++/embedded/spider_robot_zep/build/modules/hal_tdk/cmake_install.cmake")
 endif()
 
 if(NOT CMAKE_INSTALL_LOCAL_ONLY)
   # Include the install script for the subdirectory.
-  include("/home/axch/code/c++/embedded/zephyr_blinky/build/modules/hal_telink/cmake_install.cmake")
+  include("/home/axch/code/c++/embedded/spider_robot_zep/build/modules/hal_telink/cmake_install.cmake")
 endif()
 
 if(NOT CMAKE_INSTALL_LOCAL_ONLY)
   # Include the install script for the subdirectory.
-  include("/home/axch/code/c++/embedded/zephyr_blinky/build/modules/ti/cmake_install.cmake")
+  include("/home/axch/code/c++/embedded/spider_robot_zep/build/modules/ti/cmake_install.cmake")
 endif()
 
 if(NOT CMAKE_INSTALL_LOCAL_ONLY)
   # Include the install script for the subdirectory.
-  include("/home/axch/code/c++/embedded/zephyr_blinky/build/modules/hal_wch/cmake_install.cmake")
+  include("/home/axch/code/c++/embedded/spider_robot_zep/build/modules/hal_wch/cmake_install.cmake")
 endif()
 
 if(NOT CMAKE_INSTALL_LOCAL_ONLY)
   # Include the install script for the subdirectory.
-  include("/home/axch/code/c++/embedded/zephyr_blinky/build/modules/hal_wurthelektronik/cmake_install.cmake")
+  include("/home/axch/code/c++/embedded/spider_robot_zep/build/modules/hal_wurthelektronik/cmake_install.cmake")
 endif()
 
 if(NOT CMAKE_INSTALL_LOCAL_ONLY)
   # Include the install script for the subdirectory.
-  include("/home/axch/code/c++/embedded/zephyr_blinky/build/modules/xtensa/cmake_install.cmake")
+  include("/home/axch/code/c++/embedded/spider_robot_zep/build/modules/xtensa/cmake_install.cmake")
 endif()
 
 if(NOT CMAKE_INSTALL_LOCAL_ONLY)
   # Include the install script for the subdirectory.
-  include("/home/axch/code/c++/embedded/zephyr_blinky/build/modules/hostap/cmake_install.cmake")
+  include("/home/axch/code/c++/embedded/spider_robot_zep/build/modules/hostap/cmake_install.cmake")
 endif()
 
 if(NOT CMAKE_INSTALL_LOCAL_ONLY)
   # Include the install script for the subdirectory.
-  include("/home/axch/code/c++/embedded/zephyr_blinky/build/modules/liblc3/cmake_install.cmake")
+  include("/home/axch/code/c++/embedded/spider_robot_zep/build/modules/liblc3/cmake_install.cmake")
 endif()
 
 if(NOT CMAKE_INSTALL_LOCAL_ONLY)
   # Include the install script for the subdirectory.
-  include("/home/axch/code/c++/embedded/zephyr_blinky/build/modules/libmctp/cmake_install.cmake")
+  include("/home/axch/code/c++/embedded/spider_robot_zep/build/modules/libmctp/cmake_install.cmake")
 endif()
 
 if(NOT CMAKE_INSTALL_LOCAL_ONLY)
   # Include the install script for the subdirectory.
-  include("/home/axch/code/c++/embedded/zephyr_blinky/build/modules/libmetal/cmake_install.cmake")
+  include("/home/axch/code/c++/embedded/spider_robot_zep/build/modules/libmetal/cmake_install.cmake")
 endif()
 
 if(NOT CMAKE_INSTALL_LOCAL_ONLY)
   # Include the install script for the subdirectory.
-  include("/home/axch/code/c++/embedded/zephyr_blinky/build/modules/libsbc/cmake_install.cmake")
+  include("/home/axch/code/c++/embedded/spider_robot_zep/build/modules/libsbc/cmake_install.cmake")
 endif()
 
 if(NOT CMAKE_INSTALL_LOCAL_ONLY)
   # Include the install script for the subdirectory.
-  include("/home/axch/code/c++/embedded/zephyr_blinky/build/modules/littlefs/cmake_install.cmake")
+  include("/home/axch/code/c++/embedded/spider_robot_zep/build/modules/littlefs/cmake_install.cmake")
 endif()
 
 if(NOT CMAKE_INSTALL_LOCAL_ONLY)
   # Include the install script for the subdirectory.
-  include("/home/axch/code/c++/embedded/zephyr_blinky/build/modules/lora-basics-modem/cmake_install.cmake")
+  include("/home/axch/code/c++/embedded/spider_robot_zep/build/modules/lora-basics-modem/cmake_install.cmake")
 endif()
 
 if(NOT CMAKE_INSTALL_LOCAL_ONLY)
   # Include the install script for the subdirectory.
-  include("/home/axch/code/c++/embedded/zephyr_blinky/build/modules/loramac-node/cmake_install.cmake")
+  include("/home/axch/code/c++/embedded/spider_robot_zep/build/modules/loramac-node/cmake_install.cmake")
 endif()
 
 if(NOT CMAKE_INSTALL_LOCAL_ONLY)
   # Include the install script for the subdirectory.
-  include("/home/axch/code/c++/embedded/zephyr_blinky/build/modules/lvgl/cmake_install.cmake")
+  include("/home/axch/code/c++/embedded/spider_robot_zep/build/modules/lvgl/cmake_install.cmake")
 endif()
 
 if(NOT CMAKE_INSTALL_LOCAL_ONLY)
   # Include the install script for the subdirectory.
-  include("/home/axch/code/c++/embedded/zephyr_blinky/build/modules/mbedtls/cmake_install.cmake")
+  include("/home/axch/code/c++/embedded/spider_robot_zep/build/modules/mbedtls/cmake_install.cmake")
 endif()
 
 if(NOT CMAKE_INSTALL_LOCAL_ONLY)
   # Include the install script for the subdirectory.
-  include("/home/axch/code/c++/embedded/zephyr_blinky/build/modules/mcuboot/cmake_install.cmake")
+  include("/home/axch/code/c++/embedded/spider_robot_zep/build/modules/mcuboot/cmake_install.cmake")
 endif()
 
 if(NOT CMAKE_INSTALL_LOCAL_ONLY)
   # Include the install script for the subdirectory.
-  include("/home/axch/code/c++/embedded/zephyr_blinky/build/modules/mipi-sys-t/cmake_install.cmake")
+  include("/home/axch/code/c++/embedded/spider_robot_zep/build/modules/mipi-sys-t/cmake_install.cmake")
 endif()
 
 if(NOT CMAKE_INSTALL_LOCAL_ONLY)
   # Include the install script for the subdirectory.
-  include("/home/axch/code/c++/embedded/zephyr_blinky/build/modules/nanopb/cmake_install.cmake")
+  include("/home/axch/code/c++/embedded/spider_robot_zep/build/modules/nanopb/cmake_install.cmake")
 endif()
 
 if(NOT CMAKE_INSTALL_LOCAL_ONLY)
   # Include the install script for the subdirectory.
-  include("/home/axch/code/c++/embedded/zephyr_blinky/build/modules/nrf_wifi/cmake_install.cmake")
+  include("/home/axch/code/c++/embedded/spider_robot_zep/build/modules/nrf_wifi/cmake_install.cmake")
 endif()
 
 if(NOT CMAKE_INSTALL_LOCAL_ONLY)
   # Include the install script for the subdirectory.
-  include("/home/axch/code/c++/embedded/zephyr_blinky/build/modules/open-amp/cmake_install.cmake")
+  include("/home/axch/code/c++/embedded/spider_robot_zep/build/modules/open-amp/cmake_install.cmake")
 endif()
 
 if(NOT CMAKE_INSTALL_LOCAL_ONLY)
   # Include the install script for the subdirectory.
-  include("/home/axch/code/c++/embedded/zephyr_blinky/build/modules/openthread/cmake_install.cmake")
+  include("/home/axch/code/c++/embedded/spider_robot_zep/build/modules/openthread/cmake_install.cmake")
 endif()
 
 if(NOT CMAKE_INSTALL_LOCAL_ONLY)
   # Include the install script for the subdirectory.
-  include("/home/axch/code/c++/embedded/zephyr_blinky/build/modules/percepio/cmake_install.cmake")
+  include("/home/axch/code/c++/embedded/spider_robot_zep/build/modules/percepio/cmake_install.cmake")
 endif()
 
 if(NOT CMAKE_INSTALL_LOCAL_ONLY)
   # Include the install script for the subdirectory.
-  include("/home/axch/code/c++/embedded/zephyr_blinky/build/modules/picolibc/cmake_install.cmake")
+  include("/home/axch/code/c++/embedded/spider_robot_zep/build/modules/picolibc/cmake_install.cmake")
 endif()
 
 if(NOT CMAKE_INSTALL_LOCAL_ONLY)
   # Include the install script for the subdirectory.
-  include("/home/axch/code/c++/embedded/zephyr_blinky/build/modules/segger/cmake_install.cmake")
+  include("/home/axch/code/c++/embedded/spider_robot_zep/build/modules/segger/cmake_install.cmake")
 endif()
 
 if(NOT CMAKE_INSTALL_LOCAL_ONLY)
   # Include the install script for the subdirectory.
-  include("/home/axch/code/c++/embedded/zephyr_blinky/build/modules/trusted-firmware-a/cmake_install.cmake")
+  include("/home/axch/code/c++/embedded/spider_robot_zep/build/modules/trusted-firmware-a/cmake_install.cmake")
 endif()
 
 if(NOT CMAKE_INSTALL_LOCAL_ONLY)
   # Include the install script for the subdirectory.
-  include("/home/axch/code/c++/embedded/zephyr_blinky/build/modules/trusted-firmware-m/cmake_install.cmake")
+  include("/home/axch/code/c++/embedded/spider_robot_zep/build/modules/trusted-firmware-m/cmake_install.cmake")
 endif()
 
 if(NOT CMAKE_INSTALL_LOCAL_ONLY)
   # Include the install script for the subdirectory.
-  include("/home/axch/code/c++/embedded/zephyr_blinky/build/modules/uoscore-uedhoc/cmake_install.cmake")
+  include("/home/axch/code/c++/embedded/spider_robot_zep/build/modules/uoscore-uedhoc/cmake_install.cmake")
 endif()
 
 if(NOT CMAKE_INSTALL_LOCAL_ONLY)
   # Include the install script for the subdirectory.
-  include("/home/axch/code/c++/embedded/zephyr_blinky/build/modules/zcbor/cmake_install.cmake")
+  include("/home/axch/code/c++/embedded/spider_robot_zep/build/modules/zcbor/cmake_install.cmake")
 endif()
 
 if(NOT CMAKE_INSTALL_LOCAL_ONLY)
   # Include the install script for the subdirectory.
-  include("/home/axch/code/c++/embedded/zephyr_blinky/build/modules/nrf_hw_models/cmake_install.cmake")
+  include("/home/axch/code/c++/embedded/spider_robot_zep/build/modules/nrf_hw_models/cmake_install.cmake")
 endif()
 
 if(NOT CMAKE_INSTALL_LOCAL_ONLY)
   # Include the install script for the subdirectory.
-  include("/home/axch/code/c++/embedded/zephyr_blinky/build/zephyr/kernel/cmake_install.cmake")
+  include("/home/axch/code/c++/embedded/spider_robot_zep/build/zephyr/kernel/cmake_install.cmake")
 endif()
 
 if(NOT CMAKE_INSTALL_LOCAL_ONLY)
   # Include the install script for the subdirectory.
-  include("/home/axch/code/c++/embedded/zephyr_blinky/build/zephyr/cmake/flash/cmake_install.cmake")
+  include("/home/axch/code/c++/embedded/spider_robot_zep/build/zephyr/cmake/flash/cmake_install.cmake")
 endif()
 
 if(NOT CMAKE_INSTALL_LOCAL_ONLY)
   # Include the install script for the subdirectory.
-  include("/home/axch/code/c++/embedded/zephyr_blinky/build/zephyr/cmake/usage/cmake_install.cmake")
+  include("/home/axch/code/c++/embedded/spider_robot_zep/build/zephyr/cmake/usage/cmake_install.cmake")
 endif()
 
 if(NOT CMAKE_INSTALL_LOCAL_ONLY)
   # Include the install script for the subdirectory.
-  include("/home/axch/code/c++/embedded/zephyr_blinky/build/zephyr/cmake/reports/cmake_install.cmake")
+  include("/home/axch/code/c++/embedded/spider_robot_zep/build/zephyr/cmake/reports/cmake_install.cmake")
 endif()
 
+string(REPLACE ";" "\n" CMAKE_INSTALL_MANIFEST_CONTENT
+       "${CMAKE_INSTALL_MANIFEST_FILES}")
+if(CMAKE_INSTALL_LOCAL_ONLY)
+  file(WRITE "/home/axch/code/c++/embedded/spider_robot_zep/build/zephyr/install_local_manifest.txt"
+     "${CMAKE_INSTALL_MANIFEST_CONTENT}")
+endif()

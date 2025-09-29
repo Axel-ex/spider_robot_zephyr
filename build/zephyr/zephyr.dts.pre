@@ -995,4 +995,54 @@
  status = "okay";
 };
 # 0 "<command-line>" 2
+# 1 "/home/axch/code/c++/embedded/spider_robot_zep/app.overlay" 1
+
+
+
+
+
+/ {
+    pwmleds {
+        compatible = "pwm-leds";
+        fading_led: fading_led {
+
+
+
+
+            pwms = <&mcpwm0 0 0 (0 << 0)>;
+        };
+    };
+};
+
+&mcpwm0 {
+
+    status = "okay";
+
+
+
+
+
+    prescale = <1>;
+
+    prescale-timer0 = <1>;
+
+
+    pinctrl-0 = <&mcpwm0_op0a_gpio25>;
+    pinctrl-names = "default";
+
+
+};
+
+
+&pinctrl {
+    mcpwm0_op0a_gpio25: mcpwm0_op0a_gpio25 {
+        group1 {
+
+            pinmux = <(((25 & 0x3FU) << 0U) | ((0x1FFU & 0x1FFU) << 6U) | ((32 & 0x1FFU) << 15U))>;
+            output-enable;
+        };
+    };
+
+};
+# 0 "<command-line>" 2
 # 1 "/home/axch/zephyrproject/zephyr/misc/empty_file.c"

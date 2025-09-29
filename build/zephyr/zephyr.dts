@@ -319,7 +319,12 @@
 			interrupt-parent = < &intc >;         /* in zephyr/dts/xtensa/espressif/esp32/esp32_common.dtsi:274 */
 			clocks = < &clock 0xa >;              /* in zephyr/dts/xtensa/espressif/esp32/esp32_common.dtsi:275 */
 			#pwm-cells = < 0x3 >;                 /* in zephyr/dts/xtensa/espressif/esp32/esp32_common.dtsi:276 */
-			status = "disabled";                  /* in zephyr/dts/xtensa/espressif/esp32/esp32_common.dtsi:277 */
+			status = "okay";                      /* in ../code/c++/embedded/spider_robot_zep/app.overlay:21 */
+			prescale = < 0x1 >;                   /* in ../code/c++/embedded/spider_robot_zep/app.overlay:27 */
+			prescale-timer0 = < 0x1 >;            /* in ../code/c++/embedded/spider_robot_zep/app.overlay:29 */
+			pinctrl-0 = < &mcpwm0_op0a_gpio25 >;  /* in ../code/c++/embedded/spider_robot_zep/app.overlay:32 */
+			pinctrl-names = "default";            /* in ../code/c++/embedded/spider_robot_zep/app.overlay:33 */
+			phandle = < 0x11 >;                   /* in ../code/c++/embedded/spider_robot_zep/app.overlay:14 */
 		};
 
 		/* node '/soc/mcpwm@3ff6c000' defined in zephyr/dts/xtensa/espressif/esp32/esp32_common.dtsi:280 */
@@ -359,7 +364,7 @@
 				                       < 0x18 0x1 >,
 				                       < 0x1c 0x4 >; /* in zephyr/dts/xtensa/espressif/esp32/esp32_wrover_e_n4r8.dtsi:11 */
 				status = "okay";                     /* in zephyr/boards/espressif/esp32_devkitc/esp32_devkitc_procpu.dts:65 */
-				phandle = < 0x7 >;                   /* in zephyr/dts/xtensa/espressif/esp32/esp32_common.dtsi:294 */
+				phandle = < 0x8 >;                   /* in zephyr/dts/xtensa/espressif/esp32/esp32_common.dtsi:294 */
 			};
 
 			/* node '/soc/gpio/gpio@3ff44800' defined in zephyr/dts/xtensa/espressif/esp32/esp32_common.dtsi:316 */
@@ -373,7 +378,7 @@
 				ngpios = < 0x8 >;                    /* in zephyr/dts/xtensa/espressif/esp32/esp32_common.dtsi:323 */
 				gpio-reserved-ranges = < 0x5 0x2 >;  /* in zephyr/dts/xtensa/espressif/esp32/esp32_wrover_e_n4r8.dtsi:16 */
 				status = "okay";                     /* in zephyr/boards/espressif/esp32_devkitc/esp32_devkitc_procpu.dts:69 */
-				phandle = < 0x8 >;                   /* in zephyr/dts/xtensa/espressif/esp32/esp32_common.dtsi:294 */
+				phandle = < 0x9 >;                   /* in zephyr/dts/xtensa/espressif/esp32/esp32_common.dtsi:294 */
 			};
 		};
 
@@ -695,7 +700,7 @@
 				power-state-name = "standby";      /* in zephyr/dts/xtensa/espressif/esp32/esp32_common.dtsi:52 */
 				min-residency-us = < 0xc8 >;       /* in zephyr/dts/xtensa/espressif/esp32/esp32_common.dtsi:53 */
 				exit-latency-us = < 0x3c >;        /* in zephyr/dts/xtensa/espressif/esp32/esp32_common.dtsi:54 */
-				phandle = < 0xe >;                 /* in zephyr/dts/xtensa/espressif/esp32/esp32_common.dtsi:34 */
+				phandle = < 0xf >;                 /* in zephyr/dts/xtensa/espressif/esp32/esp32_common.dtsi:34 */
 			};
 
 			/* node '/cpus/power-states/deep_sleep' defined in zephyr/dts/xtensa/espressif/esp32/esp32_common.dtsi:57 */
@@ -704,7 +709,7 @@
 				power-state-name = "soft-off";     /* in zephyr/dts/xtensa/espressif/esp32/esp32_common.dtsi:59 */
 				min-residency-us = < 0x7d0 >;      /* in zephyr/dts/xtensa/espressif/esp32/esp32_common.dtsi:60 */
 				exit-latency-us = < 0xd4 >;        /* in zephyr/dts/xtensa/espressif/esp32/esp32_common.dtsi:61 */
-				phandle = < 0xf >;                 /* in zephyr/dts/xtensa/espressif/esp32/esp32_common.dtsi:34 */
+				phandle = < 0x10 >;                /* in zephyr/dts/xtensa/espressif/esp32/esp32_common.dtsi:34 */
 			};
 		};
 	};
@@ -795,7 +800,7 @@
 
 		/* node '/pin-controller/spim2_default' defined in zephyr/boards/espressif/esp32_devkitc/esp32_devkitc-pinctrl.dtsi:46 */
 		spim2_default: spim2_default {
-			phandle = < 0xc >; /* in zephyr/boards/espressif/esp32_devkitc/esp32_devkitc_procpu.dts:109 */
+			phandle = < 0xd >; /* in zephyr/boards/espressif/esp32_devkitc/esp32_devkitc_procpu.dts:109 */
 
 			/* node '/pin-controller/spim2_default/group1' defined in zephyr/boards/espressif/esp32_devkitc/esp32_devkitc-pinctrl.dtsi:47 */
 			group1 {
@@ -813,7 +818,7 @@
 
 		/* node '/pin-controller/spim3_default' defined in zephyr/boards/espressif/esp32_devkitc/esp32_devkitc-pinctrl.dtsi:59 */
 		spim3_default: spim3_default {
-			phandle = < 0xd >; /* in zephyr/boards/espressif/esp32_devkitc/esp32_devkitc_procpu.dts:117 */
+			phandle = < 0xe >; /* in zephyr/boards/espressif/esp32_devkitc/esp32_devkitc_procpu.dts:117 */
 
 			/* node '/pin-controller/spim3_default/group1' defined in zephyr/boards/espressif/esp32_devkitc/esp32_devkitc-pinctrl.dtsi:60 */
 			group1 {
@@ -831,7 +836,7 @@
 
 		/* node '/pin-controller/i2c0_default' defined in zephyr/boards/espressif/esp32_devkitc/esp32_devkitc-pinctrl.dtsi:72 */
 		i2c0_default: i2c0_default {
-			phandle = < 0x9 >; /* in zephyr/boards/espressif/esp32_devkitc/esp32_devkitc_procpu.dts:89 */
+			phandle = < 0xa >; /* in zephyr/boards/espressif/esp32_devkitc/esp32_devkitc_procpu.dts:89 */
 
 			/* node '/pin-controller/i2c0_default/group1' defined in zephyr/boards/espressif/esp32_devkitc/esp32_devkitc-pinctrl.dtsi:73 */
 			group1 {
@@ -845,7 +850,7 @@
 
 		/* node '/pin-controller/i2s0_default' defined in zephyr/boards/espressif/esp32_devkitc/esp32_devkitc-pinctrl.dtsi:82 */
 		i2s0_default: i2s0_default {
-			phandle = < 0xa >; /* in zephyr/boards/espressif/esp32_devkitc/esp32_devkitc_procpu.dts:94 */
+			phandle = < 0xb >; /* in zephyr/boards/espressif/esp32_devkitc/esp32_devkitc_procpu.dts:94 */
 
 			/* node '/pin-controller/i2s0_default/group1' defined in zephyr/boards/espressif/esp32_devkitc/esp32_devkitc-pinctrl.dtsi:83 */
 			group1 {
@@ -866,7 +871,7 @@
 
 		/* node '/pin-controller/i2s1_default' defined in zephyr/boards/espressif/esp32_devkitc/esp32_devkitc-pinctrl.dtsi:98 */
 		i2s1_default: i2s1_default {
-			phandle = < 0xb >; /* in zephyr/boards/espressif/esp32_devkitc/esp32_devkitc_procpu.dts:100 */
+			phandle = < 0xc >; /* in zephyr/boards/espressif/esp32_devkitc/esp32_devkitc_procpu.dts:100 */
 
 			/* node '/pin-controller/i2s1_default/group1' defined in zephyr/boards/espressif/esp32_devkitc/esp32_devkitc-pinctrl.dtsi:99 */
 			group1 {
@@ -882,6 +887,17 @@
 			group2 {
 				pinmux = < 0xffad4c >; /* in zephyr/boards/espressif/esp32_devkitc/esp32_devkitc-pinctrl.dtsi:109 */
 				input-enable;          /* in zephyr/boards/espressif/esp32_devkitc/esp32_devkitc-pinctrl.dtsi:110 */
+			};
+		};
+
+		/* node '/pin-controller/mcpwm0_op0a_gpio25' defined in ../code/c++/embedded/spider_robot_zep/app.overlay:40 */
+		mcpwm0_op0a_gpio25: mcpwm0_op0a_gpio25 {
+			phandle = < 0x7 >; /* in ../code/c++/embedded/spider_robot_zep/app.overlay:32 */
+
+			/* node '/pin-controller/mcpwm0_op0a_gpio25/group1' defined in ../code/c++/embedded/spider_robot_zep/app.overlay:41 */
+			group1 {
+				pinmux = < 0x107fd9 >; /* in ../code/c++/embedded/spider_robot_zep/app.overlay:43 */
+				output-enable;         /* in ../code/c++/embedded/spider_robot_zep/app.overlay:44 */
 			};
 		};
 	};
@@ -905,6 +921,16 @@
 			gpios = < &gpio0 0x0 0x11 >; /* in zephyr/boards/espressif/esp32_devkitc/esp32_devkitc_procpu.dts:29 */
 			label = "BOOT Button";       /* in zephyr/boards/espressif/esp32_devkitc/esp32_devkitc_procpu.dts:30 */
 			zephyr,code = < 0xb >;       /* in zephyr/boards/espressif/esp32_devkitc/esp32_devkitc_procpu.dts:31 */
+		};
+	};
+
+	/* node '/pwmleds' defined in ../code/c++/embedded/spider_robot_zep/app.overlay:7 */
+	pwmleds {
+		compatible = "pwm-leds"; /* in ../code/c++/embedded/spider_robot_zep/app.overlay:8 */
+
+		/* node '/pwmleds/fading_led' defined in ../code/c++/embedded/spider_robot_zep/app.overlay:9 */
+		fading_led: fading_led {
+			pwms = < &mcpwm0 0x0 0x0 0x0 >; /* in ../code/c++/embedded/spider_robot_zep/app.overlay:14 */
 		};
 	};
 };

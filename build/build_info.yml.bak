@@ -1,4 +1,5 @@
 west:
-  command: /home/axch/zephyrproject/zephyr_venv/bin/west build -b esp32
+  command: /home/axch/zephyrproject/zephyr_venv/bin/west build -p -b esp32_devkitc/esp32/procpu
+    .
   topdir: /home/axch/zephyrproject
   version: 1.4.0
