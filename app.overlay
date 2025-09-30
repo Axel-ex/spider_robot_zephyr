@@ -21,6 +21,31 @@
 		bl_femur: bl_femur {
 		pwms = <&ledc0 3 20000000 PWM_POLARITY_NORMAL>;
 		};
+		bl_tibia: bl_tibia {
+		pwms = <&ledc0 4 20000000 PWM_POLARITY_NORMAL>;
+		};
+		bl_coxa: bl_coxa {
+		pwms = <&ledc0 5 20000000 PWM_POLARITY_NORMAL>;
+		};
+		fr_femur: fr_femur {
+		pwms = <&ledc0 6 20000000 PWM_POLARITY_NORMAL>;
+		};
+		fr_tibia: fr_tibia {
+		pwms = <&ledc0 7 20000000 PWM_POLARITY_NORMAL>;
+		};
+		fr_coxa: fr_coxa {
+		pwms = <&ledc0 8 20000000 PWM_POLARITY_NORMAL>;
+		};
+		br_femur: br_femur {
+		pwms = <&ledc0 9 20000000 PWM_POLARITY_NORMAL>;
+		};
+		br_tibia: br_tibia {
+		pwms = <&ledc0 10 20000000 PWM_POLARITY_NORMAL>;
+		};
+		br_coxa: br_coxa {
+		pwms = <&ledc0 11 20000000 PWM_POLARITY_NORMAL>;
+		};
+
 	};
 };
 
@@ -29,13 +54,18 @@
 	ledc0_default: ledc0_default {
 		group1 {
 			// Assign GPIO25 to LEDC channel 0
-			pinmux = <LEDC_CH0_GPIO32>, <LEDC_CH1_GPIO33>;
+			pinmux = <LEDC_CH0_GPIO32>, <LEDC_CH1_GPIO33>, <LEDC_CH2_GPIO25>,
+			         <LEDC_CH3_GPIO26>, <LEDC_CH4_GPIO27>, <LEDC_CH5_GPIO14>,
+			         <LEDC_CH6_GPIO12>, <LEDC_CH7_GPIO13>, <LEDC_CH8_GPIO19>,
+			         <LEDC_CH9_GPIO18>, <LEDC_CH10_GPIO5>, <LEDC_CH11_GPIO17>;
 			output-enable;
 			};
 	};
 };
 
+// enable ledc
 // Assign the pinctrl configuration to the PWM controller
+// configure the channels
 &ledc0 {
 	pinctrl-0 = <&ledc0_default>;
 

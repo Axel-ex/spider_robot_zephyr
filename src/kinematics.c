@@ -1,0 +1,195 @@
+#include "kinematics.h"
+#include <math.h>
+#include <servos.h>
+#include <zephyr/logging/log.h>
+
+LOG_MODULE_REGISTER(Kinematics, LOG_LEVEL_INF);
+const float PI_CONST = 3.1415926f;
+const float KEEP = 255.0f;
+
+// --- GLOBAL INSTANCE DEFINITION ---
+// 1. Define the single global instance (Initialized to zero/defaults)
+robot_kinematics_t g_kinematics = {
+
+    // Initialize simple constants directly where possible
+    .length_a = 55.0f,
+
+    .length_b = 77.5f,       .length_c = 27.5f,        .length_side = 71.0f,
+    .z_absolute = -28.0f,
+
+    .z_default = -50.0f,     .z_up = -30.0f,           .x_default = 62.0f,
+    .y_step = 40.0f,
+
+    .speed_multiple = 1.0f,  .spot_turn_speed = 4.0f,  .leg_move_speed = 8.0f,
+    .body_move_speed = 3.0f, .stand_seat_speed = 1.0f,
+};
+
+void kinematics_init(void)
+{
+    if (g_kinematics.initialized)
+    {
+        LOG_DBG("Kinematics already initialized.");
+
+        return;
+    }
+
+    g_kinematics.z_boot = g_kinematics.z_absolute;
+
+    // Runtime calculations
+    float val_2x_l = (2.0f * g_kinematics.x_default + g_kinematics.length_side);
+
+    g_kinematics.temp_a =
+        sqrtf(powf(val_2x_l, 2.0f) + powf(g_kinematics.y_step, 2.0f));
+
+    g_kinematics.temp_b = 2.0f * (g_kinematics.y_start + g_kinematics.y_step) +
+                          g_kinematics.length_side;
+
+    g_kinematics.temp_c =
+        sqrtf(powf(val_2x_l, 2.0f) +
+              powf(2.0f * g_kinematics.y_start + g_kinematics.y_step +
+                       g_kinematics.length_side,
+                   2.0f));
+
+    g_kinematics.temp_alpha = acosf(
+        (powf(g_kinematics.temp_a, 2.0f) + powf(g_kinematics.temp_b, 2.0f) -
+         powf(g_kinematics.temp_c, 2.0f)) /
+        (2.0f * g_kinematics.temp_a * g_kinematics.temp_b));
+
+    // site for turn
+    g_kinematics.turn_x1 =
+        (g_kinematics.temp_a - g_kinematics.length_side) / 2.0f;
+    g_kinematics.turn_y1 = g_kinematics.y_start + g_kinematics.y_step / 2.0f;
+
+    g_kinematics.turn_x0 = g_kinematics.turn_x1 -
+                           g_kinematics.temp_b * cosf(g_kinematics.temp_alpha);
+    g_kinematics.turn_y0 = g_kinematics.temp_b * sinf(g_kinematics.temp_alpha) -
+                           g_kinematics.turn_y1 - g_kinematics.length_side;
+
+    g_kinematics.initialized = true;
+    LOG_INF("Kinematics constants calculated and state initialized.");
+}
+
+/**
+ * @brief Prints all fields of the global kinematics structure for verification.
+ * * Note: Uses LOG_INF level for visibility, ensuring the output is easy to
+ * read.
+ */
+void kinematics_print_debug(void)
+{
+    if (!g_kinematics.initialized)
+    {
+        LOG_WRN("Kinematics not initialized. Skipping debug print.");
+        return;
+    }
+
+    LOG_INF("--- Robot Kinematics Debug Dump ---");
+
+    // 1. Core Dimensions
+    LOG_INF("Core Dimensions:");
+    LOG_INF("  Length A/B/C: %.2f / %.2f / %.2f", (double)g_kinematics.length_a,
+            (double)g_kinematics.length_b, (double)g_kinematics.length_c);
+    LOG_INF("  Length Side: %.2f", (double)g_kinematics.length_side);
+    LOG_INF("  Z Absolute/Boot: %.2f / %.2f", (double)g_kinematics.z_absolute,
+            (double)g_kinematics.z_boot);
+
+    // 2. Movement Parameters
+    LOG_INF("Movement Parameters:");
+    LOG_INF("  X Default/Offset: %.2f / %.2f", (double)g_kinematics.x_default,
+            (double)g_kinematics.x_offset);
+    LOG_INF("  Y Start/Step: %.2f / %.2f", (double)g_kinematics.y_start,
+
+            (double)g_kinematics.y_step);
+
+    // 3. Calculated Constants (Crucial for verification)
+    LOG_INF("Calculated Turn Constants:");
+    LOG_INF("  Temp A/B/C: %.3f / %.3f / %.3f", (double)g_kinematics.temp_a,
+            (double)g_kinematics.temp_b, (double)g_kinematics.temp_c);
+    LOG_INF("  Temp Alpha (rad): %.4f", (double)g_kinematics.temp_alpha);
+    LOG_INF("  Turn X0/Y0: %.2f / %.2f",
+
+            (double)g_kinematics.turn_x0, (double)g_kinematics.turn_y0);
+    LOG_INF("  Turn X1/Y1: %.2f / %.2f", (double)g_kinematics.turn_x1,
+            (double)g_kinematics.turn_y1);
+
+    // 4. Positions
+    LOG_INF("Initial State (Site Expect/Now):");
+    for (int i = 0; i < NB_LEGS; i++)
+    {
+        LOG_INF("  Leg %d: Expect: (%.1f, %.1f, %.1f) | Current: (%.1f, %.1f, "
+                "%.1f)",
+                i,
+
+                (double)g_kinematics.site_expect[i][0],
+                (double)g_kinematics.site_expect[i][1],
+                (double)g_kinematics.site_expect[i][2],
+
+                (double)g_kinematics.site_now[i][0],
+
+                (double)g_kinematics.site_now[i][1],
+                (double)g_kinematics.site_now[i][2]);
+    }
+
+    LOG_INF("-------------------------------------");
+}
+
+void cartesian_to_polar(volatile float* alpha, volatile float* beta,
+                        volatile float* gamma, volatile float x,
+                        volatile float y, volatile float z)
+{
+    // calculate w-z degree
+    float v, w;
+    w = (x >= 0 ? 1 : -1) * (sqrt(pow(x, 2) + pow(y, 2)));
+    v = w - g_kinematics.length_c;
+    *alpha = atan2(z, v) +
+             acos((pow(g_kinematics.length_a, 2) -
+                   pow(g_kinematics.length_b, 2) + pow(v, 2) + pow(z, 2)) /
+                  2 / g_kinematics.length_a / sqrt(pow(v, 2) + pow(z, 2)));
+    *beta = acos((pow(g_kinematics.length_a, 2) +
+                  pow(g_kinematics.length_b, 2) - pow(v, 2) - pow(z, 2)) /
+                 2 / g_kinematics.length_a / g_kinematics.length_b);
+    // calculate x-y-z degree
+    *gamma = (w >= 0) ? atan2(y, x) : atan2(-y, -x);
+
+    // trans degree pi->180
+    *alpha = *alpha / PI_CONST * 180;
+    *beta = *beta / PI_CONST * 180;
+    *gamma = *gamma / PI_CONST * 180;
+}
+
+/*
+  - trans site from polar to microservos
+  - mathematical model map to fact
+  - the errors saved in eeprom will be add
+   ---------------------------------------------------------------------------*/
+void polar_to_servo(int leg, float alpha, float beta, float gamma)
+{
+    if (leg == 0)
+    {
+        alpha = 90 - alpha;
+        beta = beta;
+        gamma += 90;
+    }
+    else if (leg == 1)
+    {
+        alpha += 90;
+        beta = 180 - beta;
+        gamma = 90 - gamma;
+    }
+    else if (leg == 2)
+
+    {
+        alpha += 90;
+        beta = 180 - beta;
+        gamma = 90 - gamma;
+    }
+    else if (leg == 3)
+    {
+        alpha = 90 - alpha;
+        beta = beta;
+        gamma += 90;
+    }
+
+    set_angle(GET_SERVO_SPEC(leg, 0), alpha);
+    set_angle(GET_SERVO_SPEC(leg, 1), beta);
+    set_angle(GET_SERVO_SPEC(leg, 2), gamma);
+}
