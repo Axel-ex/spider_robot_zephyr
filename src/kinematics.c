@@ -132,6 +132,37 @@ void kinematics_print_debug(void)
     LOG_INF("-------------------------------------");
 }
 
+void set_site(int leg, float x, float y, float z)
+{
+    float length_x = 0, length_y = 0, length_z = 0;
+
+    if (x != KEEP)
+        length_x = x - g_kinematics.site_now[leg][0];
+    if (y != KEEP)
+        length_y = y - g_kinematics.site_now[leg][1];
+    if (z != KEEP)
+        length_z = z - g_kinematics.site_now[leg][2];
+
+    float length = sqrt(pow(length_x, 2) + pow(length_y, 2) + pow(length_z, 2));
+
+    g_kinematics.temp_speed[leg][0] = length_x / length *
+                                      g_kinematics.move_speed *
+                                      g_kinematics.speed_multiple;
+    g_kinematics.temp_speed[leg][1] = length_y / length *
+                                      g_kinematics.move_speed *
+                                      g_kinematics.speed_multiple;
+    g_kinematics.temp_speed[leg][2] = length_z / length *
+                                      g_kinematics.move_speed *
+                                      g_kinematics.speed_multiple;
+
+    if (x != KEEP)
+        g_kinematics.site_expect[leg][0] = x;
+    if (y != KEEP)
+        g_kinematics.site_expect[leg][1] = y;
+    if (z != KEEP)
+        g_kinematics.site_expect[leg][2] = z;
+}
+
 void cartesian_to_polar(volatile float* alpha, volatile float* beta,
                         volatile float* gamma, volatile float x,
                         volatile float y, volatile float z)
