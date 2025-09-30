@@ -1,47 +1,107 @@
-/*
- * FINAL CORRECTED Device Tree Overlay for MCPWM LED control on ESP32
- * Target: MCPWM0, Channel 0 (PWM0A), GPIO 25.
- */
-
+// LEGS: [femur, tibia, coxa]
+// FRONT_L: [32, 33, 25]
+// BOTTOM_L: [26, 27, 14]
+// FRONT_R: [12, 13, 19]
+// BOTTOM_R: [18, 5, 17]
 / {
-    pwmleds {
-        compatible = "pwm-leds";
-        fading_led: fading_led {
-            // New structure: <&controller_node channel_id period/cycles polarity>
-            // We use Channel 0 (which maps to Timer 0, Operator 0, Output A)
-            // The period/cycles cell is now required by the binding: use <0> for runtime setting.
-            // The full structure is: <&mcpwm0 channel_id period polarity>
-            pwms = <&mcpwm0 0 0 PWM_POLARITY_NORMAL>;
-        };
-    };
+
+/* Define a node for PWM-controlled LEDs */
+	pwmleds {
+		compatible = "pwm-leds";
+		// Tells Zephyr this node uses the generic PWM LED driver
+		fl_femur: fl_femur {
+		pwms = <&ledc0 0 20000000 PWM_POLARITY_NORMAL>;
+		};
+		fl_tibia: fl_tibia {
+		pwms = <&ledc0 1 20000000 PWM_POLARITY_NORMAL>;
+		};
+		fl_coxa: fl_coxa {
+		pwms = <&ledc0 2 20000000 PWM_POLARITY_NORMAL>;
+		};
+		bl_femur: bl_femur {
+		pwms = <&ledc0 3 20000000 PWM_POLARITY_NORMAL>;
+		};
+	};
 };
 
-&mcpwm0 {
-    // 1. Enable the controller
-    status = "okay"; 
-
-
-    // 2. Configure the required prescale properties as per the documentation:
-    //    We only strictly need the 'prescale' and 'prescale-timer0' for Channel 0.
-    //    Setting both to <1> provides the highest possible clock frequency and resolution.
-    prescale = <1>;       // Master clock prescaler
-
-    prescale-timer0 = <1>; // Prescaler for Timer 0 (which Channel 0 uses)
-
-    // 3. Configure pinctrl
-    pinctrl-0 = <&mcpwm0_op0a_gpio25>;
-    pinctrl-names = "default";
-    
-    // 🚨 IMPORTANT: NO CHILD NODES (op0) HERE! The driver handles the internal structure.
-};
-
-
+/* Configure pin control for the PWM controller */
 &pinctrl {
-    mcpwm0_op0a_gpio25: mcpwm0_op0a_gpio25 {
-        group1 {
-            // Use the macro for Output A on GPIO 25
-            pinmux = <MCPWM0_OUT0A_GPIO25>;
-            output-enable;
-        };
-    };
+	ledc0_default: ledc0_default {
+		group1 {
+			// Assign GPIO25 to LEDC channel 0
+			pinmux = <LEDC_CH0_GPIO32>, <LEDC_CH1_GPIO33>;
+			output-enable;
+			};
+	};
 };
+
+// Assign the pinctrl configuration to the PWM controller
+&ledc0 {
+	pinctrl-0 = <&ledc0_default>;
+
+	// Use ledc0_default pinctrl group
+	pinctrl-names = "default";
+
+	// Name for the pinctrl group
+	status = "okay";
+
+	// Enable this controller
+	#address-cells = <1>;
+
+	// Required for child address assignment (DT syntax)
+	#size-cells = <0>;
+
+	// No size cells needed for child nodes
+	// Define all 12 channels and link them to Timer 0
+	channel0@0 { reg = <0x0>; timer = <0>; };
+	channel1@1 { reg = <0x1>; timer = <0>; };
+	channel2@2 { reg = <0x2>; timer = <0>; };
+	channel3@3 { reg = <0x3>; timer = <0>; };
+	channel4@4 { reg = <0x4>; timer = <0>; };
+	channel5@5 { reg = <0x5>; timer = <0>; };
+	channel6@6 { reg = <0x6>; timer = <0>; };
+	channel7@7 { reg = <0x7>; timer = <0>; };
+	channel8@8 { reg = <0x8>; timer = <0>; };
+	channel9@9 { reg = <0x9>; timer = <0>; };
+	channel10@a { reg = <0xa>; timer = <0>; }; // Note: 0xA is 10 in hex
+	channel11@b { reg = <0xb>; timer = <0>; };
+};
+
+/* / { */
+/*     pwmleds { */
+/*         compatible = "pwm-leds"; */
+/*         servo0: servo0 { */
+/*             // New structure: <&controller_node channel_id period/cycles polarity> */
+/*             // We use Channel 0 (which maps to Timer 0, Operator 0, Output A) */
+/*             // The period/cycles cell is now required by the binding: use <0> for runtime setting. */
+/*             // The full structure is: <&mcpwm0 channel_id period polarity> */
+/*             pwms = <&mcpwm0 0 0 PWM_POLARITY_NORMAL>; */
+/*         }; */
+/*     }; */
+/* }; */
+/**/
+/* &mcpwm0 { */
+/*     // 1. Enable the controller */
+/*     status = "okay";  */
+/**/
+/*     // 2. Configure the required prescale properties as per the documentation: */
+/*     //    We only strictly need the 'prescale' and 'prescale-timer0' for Channel 0. */
+/*     //    Setting both to <1> provides the highest possible clock frequency and resolution. */
+/*     prescale = <1>;       // Master clock prescaler */
+/*     prescale-timer0 = <100>; // Prescaler for Timer 0 (which Channel 0 uses) */
+/*     // 3. Configure pinctrl */
+/*     pinctrl-0 = <&mcpwm0_op0a_gpio25>; */
+/*     pinctrl-names = "default"; */
+/* }; */
+/**/
+/**/
+/* &pinctrl { */
+/*     mcpwm0_op0a_gpio25: mcpwm0_op0a_gpio25 { */
+/*         group1 { */
+/*             // Use the macro for Output A on GPIO 25 */
+/*             pinmux = <MCPWM0_OUT0A_GPIO25>; */
+/*             output-enable; */
+/*         }; */
+/*     }; */
+/* }; */
+/**/
