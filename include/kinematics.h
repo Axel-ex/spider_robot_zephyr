@@ -58,4 +58,11 @@ extern robot_kinematics_t g_kinematics;
 void kinematics_init(void);
 void kinematics_print_debug(void);
 
+// Utils for movement calculations
+void set_site(int leg, float x, float y, float z);
+void cartesian_to_polar(volatile float* alpha, volatile float* beta,
+                        volatile float* gamma, volatile float x,
+                        volatile float y, volatile float z);
+void polar_to_servo(int leg, float alpha, float beta, float gamma);
+
 #endif
