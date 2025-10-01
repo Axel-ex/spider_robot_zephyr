@@ -47,11 +47,11 @@ typedef struct
         // Marker to ensure initialization has run
         bool initialized;
 
-} robot_kinematics_t;
+} robot_state_t;
 
 // --- GLOBAL INSTANCE DECLARATION ---
 // This is the single global object that everything will access.
-extern robot_kinematics_t g_kinematics;
+extern robot_state_t g_state;
 
 // --- PUBLIC FUNCTIONS ---
 // Function to perform all runtime calculations and state initialization

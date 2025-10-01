@@ -6,4 +6,4 @@ project (hello)
 
 include_directories(app PRIVATE include/)
 
-target_sources(app PRIVATE src/main.c src/servos.c src/kinematics.c)
+target_sources(app PRIVATE src/main.c src/servos.c src/kinematics.c src/tcp_server.c)

@@ -9,7 +9,7 @@ const float KEEP = 255.0f;
 
 // --- GLOBAL INSTANCE DEFINITION ---
 // 1. Define the single global instance (Initialized to zero/defaults)
-robot_kinematics_t g_kinematics = {
+robot_state_t g_state = {
 
     // Initialize simple constants directly where possible
     .length_a = 55.0f,
@@ -24,48 +24,49 @@ robot_kinematics_t g_kinematics = {
     .body_move_speed = 3.0f, .stand_seat_speed = 1.0f,
 };
 
+/**
+ * @brief inits the fields that need runtime initialisation (using maths
+ * functions)
+ */
 void kinematics_init(void)
 {
-    if (g_kinematics.initialized)
+    if (g_state.initialized)
     {
         LOG_DBG("Kinematics already initialized.");
 
         return;
     }
 
-    g_kinematics.z_boot = g_kinematics.z_absolute;
+    g_state.z_boot = g_state.z_absolute;
 
     // Runtime calculations
-    float val_2x_l = (2.0f * g_kinematics.x_default + g_kinematics.length_side);
+    float val_2x_l = (2.0f * g_state.x_default + g_state.length_side);
 
-    g_kinematics.temp_a =
-        sqrtf(powf(val_2x_l, 2.0f) + powf(g_kinematics.y_step, 2.0f));
+    g_state.temp_a = sqrtf(powf(val_2x_l, 2.0f) + powf(g_state.y_step, 2.0f));
 
-    g_kinematics.temp_b = 2.0f * (g_kinematics.y_start + g_kinematics.y_step) +
-                          g_kinematics.length_side;
+    g_state.temp_b =
+        2.0f * (g_state.y_start + g_state.y_step) + g_state.length_side;
 
-    g_kinematics.temp_c =
-        sqrtf(powf(val_2x_l, 2.0f) +
-              powf(2.0f * g_kinematics.y_start + g_kinematics.y_step +
-                       g_kinematics.length_side,
-                   2.0f));
+    g_state.temp_c = sqrtf(
+        powf(val_2x_l, 2.0f) +
+        powf(2.0f * g_state.y_start + g_state.y_step + g_state.length_side,
+             2.0f));
 
-    g_kinematics.temp_alpha = acosf(
-        (powf(g_kinematics.temp_a, 2.0f) + powf(g_kinematics.temp_b, 2.0f) -
-         powf(g_kinematics.temp_c, 2.0f)) /
-        (2.0f * g_kinematics.temp_a * g_kinematics.temp_b));
+    g_state.temp_alpha =
+        acosf((powf(g_state.temp_a, 2.0f) + powf(g_state.temp_b, 2.0f) -
+               powf(g_state.temp_c, 2.0f)) /
+              (2.0f * g_state.temp_a * g_state.temp_b));
 
     // site for turn
-    g_kinematics.turn_x1 =
-        (g_kinematics.temp_a - g_kinematics.length_side) / 2.0f;
-    g_kinematics.turn_y1 = g_kinematics.y_start + g_kinematics.y_step / 2.0f;
+    g_state.turn_x1 = (g_state.temp_a - g_state.length_side) / 2.0f;
+    g_state.turn_y1 = g_state.y_start + g_state.y_step / 2.0f;
 
-    g_kinematics.turn_x0 = g_kinematics.turn_x1 -
-                           g_kinematics.temp_b * cosf(g_kinematics.temp_alpha);
-    g_kinematics.turn_y0 = g_kinematics.temp_b * sinf(g_kinematics.temp_alpha) -
-                           g_kinematics.turn_y1 - g_kinematics.length_side;
+    g_state.turn_x0 =
+        g_state.turn_x1 - g_state.temp_b * cosf(g_state.temp_alpha);
+    g_state.turn_y0 = g_state.temp_b * sinf(g_state.temp_alpha) -
+                      g_state.turn_y1 - g_state.length_side;
 
-    g_kinematics.initialized = true;
+    g_state.initialized = true;
     LOG_INF("Kinematics constants calculated and state initialized.");
 }
 
@@ -76,7 +77,7 @@ void kinematics_init(void)
  */
 void kinematics_print_debug(void)
 {
-    if (!g_kinematics.initialized)
+    if (!g_state.initialized)
     {
         LOG_WRN("Kinematics not initialized. Skipping debug print.");
         return;
@@ -86,30 +87,30 @@ void kinematics_print_debug(void)
 
     // 1. Core Dimensions
     LOG_INF("Core Dimensions:");
-    LOG_INF("  Length A/B/C: %.2f / %.2f / %.2f", (double)g_kinematics.length_a,
-            (double)g_kinematics.length_b, (double)g_kinematics.length_c);
-    LOG_INF("  Length Side: %.2f", (double)g_kinematics.length_side);
-    LOG_INF("  Z Absolute/Boot: %.2f / %.2f", (double)g_kinematics.z_absolute,
-            (double)g_kinematics.z_boot);
+    LOG_INF("  Length A/B/C: %.2f / %.2f / %.2f", (double)g_state.length_a,
+            (double)g_state.length_b, (double)g_state.length_c);
+    LOG_INF("  Length Side: %.2f", (double)g_state.length_side);
+    LOG_INF("  Z Absolute/Boot: %.2f / %.2f", (double)g_state.z_absolute,
+            (double)g_state.z_boot);
 
     // 2. Movement Parameters
     LOG_INF("Movement Parameters:");
-    LOG_INF("  X Default/Offset: %.2f / %.2f", (double)g_kinematics.x_default,
-            (double)g_kinematics.x_offset);
-    LOG_INF("  Y Start/Step: %.2f / %.2f", (double)g_kinematics.y_start,
+    LOG_INF("  X Default/Offset: %.2f / %.2f", (double)g_state.x_default,
+            (double)g_state.x_offset);
+    LOG_INF("  Y Start/Step: %.2f / %.2f", (double)g_state.y_start,
 
-            (double)g_kinematics.y_step);
+            (double)g_state.y_step);
 
     // 3. Calculated Constants (Crucial for verification)
     LOG_INF("Calculated Turn Constants:");
-    LOG_INF("  Temp A/B/C: %.3f / %.3f / %.3f", (double)g_kinematics.temp_a,
-            (double)g_kinematics.temp_b, (double)g_kinematics.temp_c);
-    LOG_INF("  Temp Alpha (rad): %.4f", (double)g_kinematics.temp_alpha);
+    LOG_INF("  Temp A/B/C: %.3f / %.3f / %.3f", (double)g_state.temp_a,
+            (double)g_state.temp_b, (double)g_state.temp_c);
+    LOG_INF("  Temp Alpha (rad): %.4f", (double)g_state.temp_alpha);
     LOG_INF("  Turn X0/Y0: %.2f / %.2f",
 
-            (double)g_kinematics.turn_x0, (double)g_kinematics.turn_y0);
-    LOG_INF("  Turn X1/Y1: %.2f / %.2f", (double)g_kinematics.turn_x1,
-            (double)g_kinematics.turn_y1);
+            (double)g_state.turn_x0, (double)g_state.turn_y0);
+    LOG_INF("  Turn X1/Y1: %.2f / %.2f", (double)g_state.turn_x1,
+            (double)g_state.turn_y1);
 
     // 4. Positions
     LOG_INF("Initial State (Site Expect/Now):");
@@ -119,14 +120,13 @@ void kinematics_print_debug(void)
                 "%.1f)",
                 i,
 
-                (double)g_kinematics.site_expect[i][0],
-                (double)g_kinematics.site_expect[i][1],
-                (double)g_kinematics.site_expect[i][2],
+                (double)g_state.site_expect[i][0],
+                (double)g_state.site_expect[i][1],
+                (double)g_state.site_expect[i][2],
 
-                (double)g_kinematics.site_now[i][0],
+                (double)g_state.site_now[i][0],
 
-                (double)g_kinematics.site_now[i][1],
-                (double)g_kinematics.site_now[i][2]);
+                (double)g_state.site_now[i][1], (double)g_state.site_now[i][2]);
     }
 
     LOG_INF("-------------------------------------");
@@ -137,30 +137,27 @@ void set_site(int leg, float x, float y, float z)
     float length_x = 0, length_y = 0, length_z = 0;
 
     if (x != KEEP)
-        length_x = x - g_kinematics.site_now[leg][0];
+        length_x = x - g_state.site_now[leg][0];
     if (y != KEEP)
-        length_y = y - g_kinematics.site_now[leg][1];
+        length_y = y - g_state.site_now[leg][1];
     if (z != KEEP)
-        length_z = z - g_kinematics.site_now[leg][2];
+        length_z = z - g_state.site_now[leg][2];
 
     float length = sqrt(pow(length_x, 2) + pow(length_y, 2) + pow(length_z, 2));
 
-    g_kinematics.temp_speed[leg][0] = length_x / length *
-                                      g_kinematics.move_speed *
-                                      g_kinematics.speed_multiple;
-    g_kinematics.temp_speed[leg][1] = length_y / length *
-                                      g_kinematics.move_speed *
-                                      g_kinematics.speed_multiple;
-    g_kinematics.temp_speed[leg][2] = length_z / length *
-                                      g_kinematics.move_speed *
-                                      g_kinematics.speed_multiple;
+    g_state.temp_speed[leg][0] =
+        length_x / length * g_state.move_speed * g_state.speed_multiple;
+    g_state.temp_speed[leg][1] =
+        length_y / length * g_state.move_speed * g_state.speed_multiple;
+    g_state.temp_speed[leg][2] =
+        length_z / length * g_state.move_speed * g_state.speed_multiple;
 
     if (x != KEEP)
-        g_kinematics.site_expect[leg][0] = x;
+        g_state.site_expect[leg][0] = x;
     if (y != KEEP)
-        g_kinematics.site_expect[leg][1] = y;
+        g_state.site_expect[leg][1] = y;
     if (z != KEEP)
-        g_kinematics.site_expect[leg][2] = z;
+        g_state.site_expect[leg][2] = z;
 }
 
 void cartesian_to_polar(volatile float* alpha, volatile float* beta,
@@ -170,14 +167,14 @@ void cartesian_to_polar(volatile float* alpha, volatile float* beta,
     // calculate w-z degree
     float v, w;
     w = (x >= 0 ? 1 : -1) * (sqrt(pow(x, 2) + pow(y, 2)));
-    v = w - g_kinematics.length_c;
-    *alpha = atan2(z, v) +
-             acos((pow(g_kinematics.length_a, 2) -
-                   pow(g_kinematics.length_b, 2) + pow(v, 2) + pow(z, 2)) /
-                  2 / g_kinematics.length_a / sqrt(pow(v, 2) + pow(z, 2)));
-    *beta = acos((pow(g_kinematics.length_a, 2) +
-                  pow(g_kinematics.length_b, 2) - pow(v, 2) - pow(z, 2)) /
-                 2 / g_kinematics.length_a / g_kinematics.length_b);
+    v = w - g_state.length_c;
+    *alpha =
+        atan2(z, v) + acos((pow(g_state.length_a, 2) -
+                            pow(g_state.length_b, 2) + pow(v, 2) + pow(z, 2)) /
+                           2 / g_state.length_a / sqrt(pow(v, 2) + pow(z, 2)));
+    *beta = acos((pow(g_state.length_a, 2) + pow(g_state.length_b, 2) -
+                  pow(v, 2) - pow(z, 2)) /
+                 2 / g_state.length_a / g_state.length_b);
     // calculate x-y-z degree
     *gamma = (w >= 0) ? atan2(y, x) : atan2(-y, -x);
 
@@ -216,7 +213,7 @@ void polar_to_servo(int leg, float alpha, float beta, float gamma)
     else if (leg == 3)
     {
         alpha = 90 - alpha;
-        beta = beta;
+        beta = beta; // NO_LINT
         gamma += 90;
     }
 
