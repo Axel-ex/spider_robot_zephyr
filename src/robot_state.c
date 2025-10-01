@@ -1,4 +1,5 @@
-#include "kinematics.h"
+#include "robot_state.h"
+#include "zephyr/kernel.h"
 #include <math.h>
 #include <servos.h>
 #include <zephyr/logging/log.h>
@@ -7,8 +8,11 @@ LOG_MODULE_REGISTER(Kinematics, LOG_LEVEL_INF);
 const double PI_CONST = 3.1415926;
 const double KEEP = 255.0;
 
-// --- GLOBAL INSTANCE DEFINITION ---
-// 1. Define the single global instance (Initialized to zero/defaults)
+K_MUTEX_DEFINE(g_state_mutex);
+
+/**
+ * @brief Global instance of the state
+ */
 robot_state_t g_state = {
 
     // Initialize simple constants directly where possible
@@ -25,8 +29,7 @@ robot_state_t g_state = {
 };
 
 /**
- * @brief inits the fields that need runtime initialisation (using maths
- * functions)
+ * @brief inits the fields that need runtime initialisation
  */
 void kinematics_init(void)
 {

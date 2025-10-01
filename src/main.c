@@ -1,6 +1,5 @@
-#include "kinematics.h"
+#include "robot_state.h"
 #include "servos.h"
-#include "zephyr/logging/log_core.h"
 #include <stdlib.h>
 #include <zephyr/device.h>
 #include <zephyr/devicetree.h>

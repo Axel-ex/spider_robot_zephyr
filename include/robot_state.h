@@ -1,17 +1,19 @@
 #ifndef KINEMATICS_H
 #define KINEMATICS_H
 
+#include "zephyr/kernel.h"
 #include <stdbool.h>
 #include <stddef.h>
 
-// --- CORE CONSTANTS (Simple definition for use in C files) ---
-// Define PI as a macro or const variable. We'll use const for type safety.
 extern const double PI_CONST;
+extern struct k_mutex g_state_mutex;
 
-// --- STRUCTURE DEFINITION ---
-// This struct holds all robot dimensions, calculated constants, and runtime
-// state.
-typedef struct
+/**
+ * @typedef robot_state_t
+ * @brief structure to hold global configs and leg positions
+ *
+ */
+typedef struct robot_state_t
 {
         // --- IMMUTABLE CONSTANTS (Calculated at Runtime, but fixed) ---
         // Physical Dimensions (Read-only once initialized)
@@ -50,11 +52,8 @@ typedef struct
 } robot_state_t;
 
 // --- GLOBAL INSTANCE DECLARATION ---
-// This is the single global object that everything will access.
 extern robot_state_t g_state;
 
-// --- PUBLIC FUNCTIONS ---
-// Function to perform all runtime calculations and state initialization
 void kinematics_init(void);
 void kinematics_print_debug(void);
 
