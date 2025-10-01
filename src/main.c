@@ -41,7 +41,6 @@ void main(void)
 
     LOG_DBG("All %zu servos are ready!", NB_SERVOS);
     k_sleep(K_SECONDS(1));
-    center_all_servos(servos, NB_SERVOS);
 
     while (true)
         k_sleep(K_SECONDS(1));
