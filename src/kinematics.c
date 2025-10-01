@@ -4,24 +4,24 @@
 #include <zephyr/logging/log.h>
 
 LOG_MODULE_REGISTER(Kinematics, LOG_LEVEL_INF);
-const float PI_CONST = 3.1415926f;
-const float KEEP = 255.0f;
+const double PI_CONST = 3.1415926;
+const double KEEP = 255.0;
 
 // --- GLOBAL INSTANCE DEFINITION ---
 // 1. Define the single global instance (Initialized to zero/defaults)
 robot_state_t g_state = {
 
     // Initialize simple constants directly where possible
-    .length_a = 55.0f,
+    .length_a = 55.0,
 
-    .length_b = 77.5f,       .length_c = 27.5f,        .length_side = 71.0f,
-    .z_absolute = -28.0f,
+    .length_b = 77.5,       .length_c = 27.5,        .length_side = 71.0,
+    .z_absolute = -28.0,
 
-    .z_default = -50.0f,     .z_up = -30.0f,           .x_default = 62.0f,
-    .y_step = 40.0f,
+    .z_default = -50.0,     .z_up = -30.0,           .x_default = 62.0,
+    .y_step = 40.0,
 
-    .speed_multiple = 1.0f,  .spot_turn_speed = 4.0f,  .leg_move_speed = 8.0f,
-    .body_move_speed = 3.0f, .stand_seat_speed = 1.0f,
+    .speed_multiple = 1.0,  .spot_turn_speed = 4.0,  .leg_move_speed = 8.0,
+    .body_move_speed = 3.0, .stand_seat_speed = 1.0,
 };
 
 /**
@@ -40,30 +40,29 @@ void kinematics_init(void)
     g_state.z_boot = g_state.z_absolute;
 
     // Runtime calculations
-    float val_2x_l = (2.0f * g_state.x_default + g_state.length_side);
+    double val_2x_l = (2.0 * g_state.x_default + g_state.length_side);
 
-    g_state.temp_a = sqrtf(powf(val_2x_l, 2.0f) + powf(g_state.y_step, 2.0f));
+    g_state.temp_a = sqrt(pow(val_2x_l, 2.0) + pow(g_state.y_step, 2.0));
 
     g_state.temp_b =
-        2.0f * (g_state.y_start + g_state.y_step) + g_state.length_side;
+        2.0 * (g_state.y_start + g_state.y_step) + g_state.length_side;
 
-    g_state.temp_c = sqrtf(
-        powf(val_2x_l, 2.0f) +
-        powf(2.0f * g_state.y_start + g_state.y_step + g_state.length_side,
-             2.0f));
+    g_state.temp_c = sqrt(
+        pow(val_2x_l, 2.0) +
+        pow(2.0 * g_state.y_start + g_state.y_step + g_state.length_side, 2.0));
 
     g_state.temp_alpha =
-        acosf((powf(g_state.temp_a, 2.0f) + powf(g_state.temp_b, 2.0f) -
-               powf(g_state.temp_c, 2.0f)) /
-              (2.0f * g_state.temp_a * g_state.temp_b));
+        acos((pow(g_state.temp_a, 2.0) + pow(g_state.temp_b, 2.0) -
+              pow(g_state.temp_c, 2.0)) /
+             (2.0 * g_state.temp_a * g_state.temp_b));
 
     // site for turn
-    g_state.turn_x1 = (g_state.temp_a - g_state.length_side) / 2.0f;
-    g_state.turn_y1 = g_state.y_start + g_state.y_step / 2.0f;
+    g_state.turn_x1 = (g_state.temp_a - g_state.length_side) / 2.0;
+    g_state.turn_y1 = g_state.y_start + g_state.y_step / 2.0;
 
     g_state.turn_x0 =
-        g_state.turn_x1 - g_state.temp_b * cosf(g_state.temp_alpha);
-    g_state.turn_y0 = g_state.temp_b * sinf(g_state.temp_alpha) -
+        g_state.turn_x1 - g_state.temp_b * cos(g_state.temp_alpha);
+    g_state.turn_y0 = g_state.temp_b * sin(g_state.temp_alpha) -
                       g_state.turn_y1 - g_state.length_side;
 
     g_state.initialized = true;
@@ -132,9 +131,9 @@ void kinematics_print_debug(void)
     LOG_INF("-------------------------------------");
 }
 
-void set_site(int leg, float x, float y, float z)
+void set_site(int leg, double x, double y, double z)
 {
-    float length_x = 0, length_y = 0, length_z = 0;
+    double length_x = 0, length_y = 0, length_z = 0;
 
     if (x != KEEP)
         length_x = x - g_state.site_now[leg][0];
@@ -143,7 +142,8 @@ void set_site(int leg, float x, float y, float z)
     if (z != KEEP)
         length_z = z - g_state.site_now[leg][2];
 
-    float length = sqrt(pow(length_x, 2) + pow(length_y, 2) + pow(length_z, 2));
+    double length =
+        sqrt(pow(length_x, 2) + pow(length_y, 2) + pow(length_z, 2));
 
     g_state.temp_speed[leg][0] =
         length_x / length * g_state.move_speed * g_state.speed_multiple;
@@ -160,12 +160,12 @@ void set_site(int leg, float x, float y, float z)
         g_state.site_expect[leg][2] = z;
 }
 
-void cartesian_to_polar(volatile float* alpha, volatile float* beta,
-                        volatile float* gamma, volatile float x,
-                        volatile float y, volatile float z)
+void cartesian_to_polar(volatile double* alpha, volatile double* beta,
+                        volatile double* gamma, volatile double x,
+                        volatile double y, volatile double z)
 {
     // calculate w-z degree
-    float v, w;
+    double v, w;
     w = (x >= 0 ? 1 : -1) * (sqrt(pow(x, 2) + pow(y, 2)));
     v = w - g_state.length_c;
     *alpha =
@@ -184,12 +184,14 @@ void cartesian_to_polar(volatile float* alpha, volatile float* beta,
     *gamma = *gamma / PI_CONST * 180;
 }
 
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wself-assign"
 /*
   - trans site from polar to microservos
   - mathematical model map to fact
   - the errors saved in eeprom will be add
    ---------------------------------------------------------------------------*/
-void polar_to_servo(int leg, float alpha, float beta, float gamma)
+void polar_to_servo(int leg, double alpha, double beta, double gamma)
 {
     if (leg == 0)
     {
@@ -213,7 +215,7 @@ void polar_to_servo(int leg, float alpha, float beta, float gamma)
     else if (leg == 3)
     {
         alpha = 90 - alpha;
-        beta = beta; // NO_LINT
+        beta = beta;
         gamma += 90;
     }
 
@@ -221,3 +223,4 @@ void polar_to_servo(int leg, float alpha, float beta, float gamma)
     set_angle(GET_SERVO_SPEC(leg, 1), beta);
     set_angle(GET_SERVO_SPEC(leg, 2), gamma);
 }
+#pragma clang diagnostic pop
