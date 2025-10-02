@@ -4,10 +4,9 @@
 #include <servos.h>
 #include <zephyr/logging/log.h>
 
-LOG_MODULE_REGISTER(Kinematics, LOG_LEVEL_INF);
+LOG_MODULE_REGISTER(robot_state, LOG_LEVEL_INF);
 const double PI_CONST = 3.1415926;
 const double KEEP = 255.0;
-
 K_MUTEX_DEFINE(g_state_mutex);
 
 /**
@@ -16,26 +15,34 @@ K_MUTEX_DEFINE(g_state_mutex);
 robot_state_t g_state = {
 
     // Initialize simple constants directly where possible
+    .motion_state = MOTION_IDLE,
     .length_a = 55.0,
 
-    .length_b = 77.5,       .length_c = 27.5,        .length_side = 71.0,
+    .length_b = 77.5,
+    .length_c = 27.5,
+    .length_side = 71.0,
     .z_absolute = -28.0,
 
-    .z_default = -50.0,     .z_up = -30.0,           .x_default = 62.0,
+    .z_default = -50.0,
+    .z_up = -30.0,
+    .x_default = 62.0,
     .y_step = 40.0,
 
-    .speed_multiple = 1.0,  .spot_turn_speed = 4.0,  .leg_move_speed = 8.0,
-    .body_move_speed = 3.0, .stand_seat_speed = 1.0,
+    .speed_multiple = 1.0,
+    .spot_turn_speed = 4.0,
+    .leg_move_speed = 8.0,
+    .body_move_speed = 3.0,
+    .stand_seat_speed = 1.0,
 };
 
 /**
  * @brief inits the fields that need runtime initialisation
  */
-void kinematics_init(void)
+void init_robot_state(void)
 {
     if (g_state.initialized)
     {
-        LOG_DBG("Kinematics already initialized.");
+        LOG_DBG("State already initialized.");
 
         return;
     }
@@ -69,23 +76,23 @@ void kinematics_init(void)
                       g_state.turn_y1 - g_state.length_side;
 
     g_state.initialized = true;
-    LOG_INF("Kinematics constants calculated and state initialized.");
+    LOG_INF("State initialized.");
 }
 
 /**
- * @brief Prints all fields of the global kinematics structure for verification.
+ * @brief Prints all fields of the global state structure for verification.
  * * Note: Uses LOG_INF level for visibility, ensuring the output is easy to
  * read.
  */
-void kinematics_print_debug(void)
+void print_robot_state(void)
 {
     if (!g_state.initialized)
     {
-        LOG_WRN("Kinematics not initialized. Skipping debug print.");
+        LOG_WRN("State not initialized. Skipping debug print.");
         return;
     }
 
-    LOG_INF("--- Robot Kinematics Debug Dump ---");
+    LOG_INF("--- Robot State Debug Dump ---");
 
     // 1. Core Dimensions
     LOG_INF("Core Dimensions:");
@@ -138,6 +145,7 @@ void set_site(int leg, double x, double y, double z)
 {
     double length_x = 0, length_y = 0, length_z = 0;
 
+    k_mutex_lock(&g_state_mutex, K_FOREVER);
     if (x != KEEP)
         length_x = x - g_state.site_now[leg][0];
     if (y != KEEP)
@@ -161,6 +169,7 @@ void set_site(int leg, double x, double y, double z)
         g_state.site_expect[leg][1] = y;
     if (z != KEEP)
         g_state.site_expect[leg][2] = z;
+    k_mutex_unlock(&g_state_mutex);
 }
 
 void cartesian_to_polar(volatile double* alpha, volatile double* beta,

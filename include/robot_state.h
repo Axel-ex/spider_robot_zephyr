@@ -6,7 +6,15 @@
 #include <stddef.h>
 
 extern const double PI_CONST;
+extern const double KEEP;
 extern struct k_mutex g_state_mutex;
+extern struct k_sem motion_finished;
+
+typedef enum
+{
+    MOTION_IDLE,
+    MOTION_IN_PROGRESS,
+} motion_state_t;
 
 /**
  * @typedef robot_state_t
@@ -15,6 +23,8 @@ extern struct k_mutex g_state_mutex;
  */
 typedef struct robot_state_t
 {
+        motion_state_t motion_state;
+
         // --- IMMUTABLE CONSTANTS (Calculated at Runtime, but fixed) ---
         // Physical Dimensions (Read-only once initialized)
         double length_a, length_b, length_c;
@@ -54,8 +64,8 @@ typedef struct robot_state_t
 // --- GLOBAL INSTANCE DECLARATION ---
 extern robot_state_t g_state;
 
-void kinematics_init(void);
-void kinematics_print_debug(void);
+void init_robot_state(void);
+void print_robot_state(void);
 
 // Utils for movement calculations
 void set_site(int leg, double x, double y, double z);

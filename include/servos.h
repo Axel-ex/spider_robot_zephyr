@@ -1,3 +1,4 @@
+#include <stddef.h>
 #include <zephyr/drivers/pwm.h>
 
 // Structural constants
@@ -17,6 +18,7 @@
 #define GET_SERVO_SPEC(leg_id, joint_id)                                       \
     (&servos[((leg_id) * JOINTS_PER_LEG) + (joint_id)])
 
+extern const size_t NB_SERVOS;
 extern const struct pwm_dt_spec servos[];
 
 // helpers

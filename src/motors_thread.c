@@ -13,7 +13,7 @@ K_SEM_DEFINE(motion_finished, 0, 1);
  * @brief update the legs positions every 20ms. When the positions of the legs
  * reach the expected,
  */
-void motor_thread(void)
+void motors_thread(void)
 {
     static double alpha, beta, gamma;
     k_timeout_t period = K_MSEC(20);
@@ -52,18 +52,18 @@ void motor_thread(void)
             polar_to_servo(leg, alpha, beta, gamma);
         }
 
+        if (k_mutex_unlock(&g_state_mutex) != 0)
+            LOG_ERR("Fail unlocking the mutex");
+
         // Give the semaphore when motion is done. The smaphore is taken by the
         // gait thread.
         if (all_finished)
             if (k_sem_count_get(&motion_finished) == 0)
                 k_sem_give(&motion_finished);
 
-        if (k_mutex_unlock(&g_state_mutex) != 0)
-            LOG_ERR("Fail unlocking the mutex");
-
         k_sleep(period);
     }
 }
 
-K_THREAD_DEFINE(motor_thread_id, MOTOR_THREAD_STACK_SIZE, motor_thread, NULL,
-                NULL, NULL, MOTOR_THREAD_PRIORITY, 0, K_USER);
+K_THREAD_DEFINE(motor_thread_id, MOTOR_THREAD_STACK_SIZE, motors_thread, NULL,
+                NULL, NULL, MOTOR_THREAD_PRIORITY, K_USER, 0);

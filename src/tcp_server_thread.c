@@ -25,7 +25,6 @@ static void handle_ipv4_result(struct net_if* iface)
 
     for (i = 0; i < NET_IF_MAX_IPV4_ADDR; i++)
     {
-
         char buf[NET_IPV4_ADDR_LEN];
 
         if (iface->config.ip.ipv4->unicast[i].ipv4.addr_type != NET_ADDR_DHCP)
@@ -38,12 +37,6 @@ static void handle_ipv4_result(struct net_if* iface)
                     AF_INET,
                     &iface->config.ip.ipv4->unicast[i].ipv4.address.in_addr,
                     buf, sizeof(buf)));
-        LOG_INF("Subnet: %s",
-                net_addr_ntop(AF_INET,
-                              &iface->config.ip.ipv4->unicast[i].netmask, buf,
-                              sizeof(buf)));
-        LOG_INF("Router: %s", net_addr_ntop(AF_INET, &iface->config.ip.ipv4->gw,
-                                            buf, sizeof(buf)));
     }
 
     k_sem_give(&ipv4_obtained);
@@ -54,10 +47,10 @@ static void net_event_handler(struct net_mgmt_event_callback* event_cb,
 {
     switch (mgmt_event)
     {
-        const struct wifi_status* status =
-            (const struct wifi_status*)event_cb->info;
-
         case NET_EVENT_WIFI_CONNECT_RESULT:
+        {
+            const struct wifi_status* status =
+                (const struct wifi_status*)event_cb->info;
             if (status->status == 0)
             {
                 LOG_INF("Wifi connected!");
@@ -68,7 +61,11 @@ static void net_event_handler(struct net_mgmt_event_callback* event_cb,
                 LOG_ERR("Wifi connection failed (%d)", status->status);
             }
             break;
+        }
         case NET_EVENT_WIFI_DISCONNECT_RESULT:
+        {
+            const struct wifi_status* status =
+                (const struct wifi_status*)event_cb->info;
             if (status->status)
                 LOG_DBG("Wifi disconnection request (%d)", status->status);
             else
@@ -76,6 +73,7 @@ static void net_event_handler(struct net_mgmt_event_callback* event_cb,
                 LOG_ERR("Wifi diconnected");
                 k_sem_take(&wifi_connected, K_NO_WAIT);
             }
+        }
         case NET_EVENT_IPV4_ADDR_ADD:
             handle_ipv4_result(iface);
             break;
@@ -107,8 +105,10 @@ void wifi_connect(void)
 }
 
 // TCP_SERVER
-#define TCP_SERVER_THREAD_PRIORITY 20
+#define TCP_SERVER_THREAD_PRIORITY 5
 #define TCP_SERVER_STACK_SIZE 1024 // Probably will have to be bigger
+
+void handle_client(int client_socket) { return; }
 
 void tcp_server_thread(void)
 {
@@ -117,16 +117,18 @@ void tcp_server_thread(void)
                                      NET_EVENT_WIFI_DISCONNECT_RESULT);
     net_mgmt_init_event_callback(&ipv4_cb, net_event_handler,
                                  NET_EVENT_IPV4_ADDR_ADD);
+
+    net_mgmt_add_event_callback(&wifi_cb);
+    net_mgmt_add_event_callback(&ipv4_cb);
+
     wifi_connect();
     k_sem_take(&wifi_connected, K_FOREVER);
     k_sem_take(&ipv4_obtained, K_FOREVER);
-    LOG_INF("Wifi connected!");
 
-    // TODO: tcp logic here
-    int socket = zsock_socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
-    if (socket < 0)
+    int listening_sock = zsock_socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
+    if (listening_sock < 0)
     {
-        LOG_ERR("Fail creating socket (%d)", socket);
+        LOG_ERR("Fail creating socket (%d)", listening_sock);
         return;
     }
 
@@ -135,23 +137,41 @@ void tcp_server_thread(void)
     server_addr.sin_port = htons(SERVER_PORT);
     server_addr.sin_addr.s_addr = INADDR_ANY;
 
-    if (zsock_bind(socket, (const struct sockaddr*)&server_addr,
+    if (zsock_bind(listening_sock, (const struct sockaddr*)&server_addr,
                    sizeof(server_addr)) < 0)
     {
         LOG_ERR("Failed binding the socket (%d)", errno);
         return;
     }
 
-    if (zsock_listen(socket, MAX_CLIENT_QUEUE) < 0)
+    if (zsock_listen(listening_sock, MAX_CLIENT_QUEUE) < 0)
     {
         LOG_ERR("Failed to listen on socket (%d)", errno);
-        zsock_close(socket);
+        zsock_close(listening_sock);
         return;
     }
     LOG_INF("Listening on port %d...", SERVER_PORT);
 
+    int client_sock = -1;
     while (true)
     {
+        if (client_sock < 0)
+        {
+            LOG_DBG("Waiting for client connection...");
+            client_sock = zsock_accept(listening_sock, NULL,
+                                       NULL); // block until a client connects
+            if (client_sock < 0)
+            {
+                LOG_ERR("Failed to accept client (%d)", errno);
+                k_sleep(K_SECONDS(1));
+                continue;
+            }
+            LOG_INF("Client accepted!");
+            handle_client(client_sock);
+            zsock_close(client_sock);
+            client_sock = -1;
+        }
+
         k_sleep(K_SECONDS(2));
     }
 }
