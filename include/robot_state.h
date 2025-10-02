@@ -10,12 +10,6 @@ extern const double KEEP;
 extern struct k_mutex g_state_mutex;
 extern struct k_sem motion_finished;
 
-typedef enum
-{
-    MOTION_IDLE,
-    MOTION_IN_PROGRESS,
-} motion_state_t;
-
 /**
  * @typedef robot_state_t
  * @brief structure to hold global configs and leg positions
@@ -23,7 +17,6 @@ typedef enum
  */
 typedef struct robot_state_t
 {
-        motion_state_t motion_state;
 
         // --- IMMUTABLE CONSTANTS (Calculated at Runtime, but fixed) ---
         // Physical Dimensions (Read-only once initialized)

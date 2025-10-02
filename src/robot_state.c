@@ -15,24 +15,16 @@ K_MUTEX_DEFINE(g_state_mutex);
 robot_state_t g_state = {
 
     // Initialize simple constants directly where possible
-    .motion_state = MOTION_IDLE,
     .length_a = 55.0,
 
-    .length_b = 77.5,
-    .length_c = 27.5,
-    .length_side = 71.0,
+    .length_b = 77.5,       .length_c = 27.5,        .length_side = 71.0,
     .z_absolute = -28.0,
 
-    .z_default = -50.0,
-    .z_up = -30.0,
-    .x_default = 62.0,
+    .z_default = -50.0,     .z_up = -30.0,           .x_default = 62.0,
     .y_step = 40.0,
 
-    .speed_multiple = 1.0,
-    .spot_turn_speed = 4.0,
-    .leg_move_speed = 8.0,
-    .body_move_speed = 3.0,
-    .stand_seat_speed = 1.0,
+    .speed_multiple = 1.0,  .spot_turn_speed = 4.0,  .leg_move_speed = 8.0,
+    .body_move_speed = 3.0, .stand_seat_speed = 1.0,
 };
 
 /**
