@@ -6,4 +6,9 @@ project (hello)
 
 include_directories(app PRIVATE include/)
 
-target_sources(app PRIVATE src/main.c src/servos.c src/kinematics.c src/tcp_server_thread.c src/motors_thread.c)
+zephyr_include_directories(${CMAKE_CURRENT_SOURCE_DIR})
+
+# Tell Zephyr about your custom Kconfig file
+set(KCONFIG_ROOT ${CMAKE_CURRENT_SOURCE_DIR}/Kconfig.secrets)
+
+target_sources(app PRIVATE src/main.c src/servos.c src/robot_state.c src/tcp_server_thread.c src/motors_thread.c)
