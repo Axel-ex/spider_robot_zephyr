@@ -6,9 +6,9 @@ void stand(void);
 void step_forward(unsigned int step);
 
 // motor_thread.c
-void cartesian_to_polar(volatile double* alpha, volatile double* beta,
-                        volatile double* gamma, volatile double x,
-                        volatile double y, volatile double z);
-void polar_to_servo(int leg, double alpha, double beta, double gamma);
+void cartesian_to_polar(volatile float* alpha, volatile float* beta,
+                        volatile float* gamma, volatile float x,
+                        volatile float y, volatile float z);
+void polar_to_servo(int leg, float alpha, float beta, float gamma);
 
 #endif // !GAIT

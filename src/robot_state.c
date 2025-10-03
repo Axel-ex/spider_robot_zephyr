@@ -5,8 +5,8 @@
 #include <zephyr/logging/log.h>
 
 LOG_MODULE_REGISTER(robot_state, LOG_LEVEL_DBG);
-const double PI_CONST = 3.1415926;
-const double KEEP = 255.0;
+const float PI_CONST = 3.1415926;
+const float KEEP = 255.0;
 K_MUTEX_DEFINE(g_state_mutex);
 
 /**
@@ -42,7 +42,7 @@ void init_robot_state(void)
     g_state.z_boot = g_state.z_absolute;
 
     // Runtime calculations
-    double val_2x_l = (2.0 * g_state.x_default + g_state.length_side);
+    float val_2x_l = (2.0 * g_state.x_default + g_state.length_side);
 
     g_state.temp_a = sqrt(pow(val_2x_l, 2.0) + pow(g_state.y_step, 2.0));
 

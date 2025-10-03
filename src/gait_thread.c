@@ -9,12 +9,12 @@ LOG_MODULE_REGISTER(gait_thread, LOG_LEVEL_DBG);
 #define GAIT_STACK_SIZE 1024
 #define GAIT_THREAD_PRIORITY 5
 
-void set_site(int leg, double x, double y, double z)
+void set_site(int leg, float x, float y, float z)
 {
     LOG_DBG("set_site(leg=%d) called with target (x:%.2f, y:%.2f, z:%.2f). "
             "Current pos is (y:%.2f)",
             leg, x, y, z, g_state.site_now[leg][1]);
-    double length_x = 0, length_y = 0, length_z = 0;
+    float length_x = 0, length_y = 0, length_z = 0;
 
     if (x != KEEP)
         length_x = x - g_state.site_now[leg][0];
@@ -23,10 +23,9 @@ void set_site(int leg, double x, double y, double z)
     if (z != KEEP)
         length_z = z - g_state.site_now[leg][2];
 
-    double length =
-        sqrt(pow(length_x, 2) + pow(length_y, 2) + pow(length_z, 2));
+    float length = sqrt(pow(length_x, 2) + pow(length_y, 2) + pow(length_z, 2));
 
-    double speed_factor = g_state.move_speed * g_state.speed_multiple / length;
+    float speed_factor = g_state.move_speed * g_state.speed_multiple / length;
     g_state.temp_speed[leg][0] = length_x * speed_factor;
     g_state.temp_speed[leg][1] = length_y * speed_factor;
     g_state.temp_speed[leg][2] = length_z * speed_factor;
@@ -105,7 +104,7 @@ void stand(void)
 
 void step_forward(unsigned int step)
 {
-    double local_leg_move_speed, local_body_move_speed;
+    float local_leg_move_speed, local_body_move_speed;
 
     k_mutex_lock(&g_state_mutex, K_FOREVER);
     local_leg_move_speed = g_state.leg_move_speed;
@@ -115,15 +114,8 @@ void step_forward(unsigned int step)
     while (step-- > 0)
     {
         k_mutex_lock(&g_state_mutex, K_FOREVER);
-        bool leg_2_is_home =
-            (fabs(g_state.site_now[2][1] - g_state.y_start) < EPSILON);
-        double current_leg2_y = g_state.site_now[2][1];
+        bool leg_2_is_home = fabs(g_state.site_now[2][1] - g_state.y_start);
         k_mutex_unlock(&g_state_mutex);
-        // Add this log right after the check
-        //
-        LOG_DBG("step_forward loop #%d: leg 2 y is %.2f, condition "
-                "'leg_2_is_home' is %s",
-                step, current_leg2_y, leg_2_is_home ? "true" : "false");
 
         if (leg_2_is_home)
         {
@@ -134,7 +126,7 @@ void step_forward(unsigned int step)
                      g_state.z_up);
             k_mutex_unlock(&g_state_mutex);
             wait_all_reach();
-            LOG_DBG("done");
+            LOG_DBG("Lifting leg 2 done");
 
             // --- Gait Step 2: Leg 2 moves forward ---
             k_mutex_lock(&g_state_mutex, K_FOREVER);
@@ -142,7 +134,7 @@ void step_forward(unsigned int step)
                      g_state.y_start + 2 * g_state.y_step, g_state.z_up);
             k_mutex_unlock(&g_state_mutex);
             wait_all_reach();
-            LOG_DBG("done");
+            LOG_DBG("Moving leg 2 forward done");
 
             // --- Gait Step 3: Leg 2 moves down to new position ---
             k_mutex_lock(&g_state_mutex, K_FOREVER);
@@ -150,7 +142,7 @@ void step_forward(unsigned int step)
                      g_state.y_start + 2 * g_state.y_step, g_state.z_default);
             k_mutex_unlock(&g_state_mutex);
             wait_all_reach();
-            LOG_DBG("done");
+            LOG_DBG("Moving leg 2 done");
 
             // --- Gait Step 4: Body moves to new center of gravity ---
             k_mutex_lock(&g_state_mutex, K_FOREVER);

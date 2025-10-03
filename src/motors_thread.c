@@ -17,7 +17,7 @@ K_SEM_DEFINE(motion_finished, 0, 1);
  */
 void motors_thread(void)
 {
-    static double alpha, beta, gamma;
+    static float alpha, beta, gamma;
     k_timeout_t period = K_MSEC(20);
 
     while (true)
@@ -34,26 +34,19 @@ void motors_thread(void)
         {
             for (int joint = 0; joint < 3; joint++)
             {
-                double current_pos = g_state.site_now[leg][joint];
-                double target_pos = g_state.site_expect[leg][joint];
-                double remaining_dist = target_pos - current_pos;
-
-                if (fabs(remaining_dist) < EPSILON)
-                    continue; // joint done
-                all_finished = false;
-
-                double step_dist = g_state.temp_speed[leg][joint];
+                float current_pos = g_state.site_now[leg][joint];
+                float target_pos = g_state.site_expect[leg][joint];
+                float remaining_dist = target_pos - current_pos;
+                float step_dist = g_state.temp_speed[leg][joint];
 
                 if (fabs(remaining_dist) < fabs(step_dist))
                 {
-                    // If the remaining distance is smaller than a full step,
-                    // the step to take is just the remaining distance itself.
                     g_state.site_now[leg][joint] = target_pos;
                 }
                 else
                 {
-                    // Otherwise, we are far enough away to take a full step.
                     g_state.site_now[leg][joint] += step_dist;
+                    all_finished = false;
                 }
             }
             cartesian_to_polar(&alpha, &beta, &gamma, g_state.site_now[leg][0],
@@ -72,10 +65,13 @@ void motors_thread(void)
         if (k_mutex_unlock(&g_state_mutex) != 0)
             LOG_ERR("Fail unlocking the mutex");
 
-        // TODO: Make sure you give the sem only once (get count and print
-        // debug)
         if (all_finished)
-            k_sem_give(&motion_finished);
+        {
+            if (k_sem_count_get(&motion_finished) ==
+                0) // make sure giving the sema ONLY ONCE
+                k_sem_give(&motion_finished);
+            LOG_DBG("giving the sem");
+        }
 
         k_sleep(period);
     }
@@ -84,12 +80,12 @@ void motors_thread(void)
 K_THREAD_DEFINE(motor_thread_id, MOTOR_THREAD_STACK_SIZE, motors_thread, NULL,
                 NULL, NULL, MOTOR_THREAD_PRIORITY, K_USER, 0);
 
-void cartesian_to_polar(volatile double* alpha, volatile double* beta,
-                        volatile double* gamma, volatile double x,
-                        volatile double y, volatile double z)
+void cartesian_to_polar(volatile float* alpha, volatile float* beta,
+                        volatile float* gamma, volatile float x,
+                        volatile float y, volatile float z)
 {
     // calculate w-z degree
-    double v, w;
+    float v, w;
     w = (x >= 0 ? 1 : -1) * (sqrt(pow(x, 2) + pow(y, 2)));
     v = w - g_state.length_c;
     *alpha =
@@ -115,7 +111,7 @@ void cartesian_to_polar(volatile double* alpha, volatile double* beta,
   - mathematical model map to fact
   - the errors saved in eeprom will be add
    ---------------------------------------------------------------------------*/
-void polar_to_servo(int leg, double alpha, double beta, double gamma)
+void polar_to_servo(int leg, float alpha, float beta, float gamma)
 {
     if (leg == 0)
     {
