@@ -5,6 +5,8 @@
 #include <stdbool.h>
 #include <stddef.h>
 
+#define EPSILON 0.001
+
 extern const double PI_CONST;
 extern const double KEEP;
 extern struct k_mutex g_state_mutex;

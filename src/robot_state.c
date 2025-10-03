@@ -4,7 +4,7 @@
 #include <servos.h>
 #include <zephyr/logging/log.h>
 
-LOG_MODULE_REGISTER(robot_state, LOG_LEVEL_INF);
+LOG_MODULE_REGISTER(robot_state, LOG_LEVEL_DBG);
 const double PI_CONST = 3.1415926;
 const double KEEP = 255.0;
 K_MUTEX_DEFINE(g_state_mutex);
@@ -132,99 +132,3 @@ void print_robot_state(void)
 
     LOG_INF("-------------------------------------");
 }
-
-void set_site(int leg, double x, double y, double z)
-{
-    double length_x = 0, length_y = 0, length_z = 0;
-
-    k_mutex_lock(&g_state_mutex, K_FOREVER);
-    if (x != KEEP)
-        length_x = x - g_state.site_now[leg][0];
-    if (y != KEEP)
-        length_y = y - g_state.site_now[leg][1];
-    if (z != KEEP)
-        length_z = z - g_state.site_now[leg][2];
-
-    double length =
-        sqrt(pow(length_x, 2) + pow(length_y, 2) + pow(length_z, 2));
-
-    g_state.temp_speed[leg][0] =
-        length_x / length * g_state.move_speed * g_state.speed_multiple;
-    g_state.temp_speed[leg][1] =
-        length_y / length * g_state.move_speed * g_state.speed_multiple;
-    g_state.temp_speed[leg][2] =
-        length_z / length * g_state.move_speed * g_state.speed_multiple;
-
-    if (x != KEEP)
-        g_state.site_expect[leg][0] = x;
-    if (y != KEEP)
-        g_state.site_expect[leg][1] = y;
-    if (z != KEEP)
-        g_state.site_expect[leg][2] = z;
-    k_mutex_unlock(&g_state_mutex);
-}
-
-void cartesian_to_polar(volatile double* alpha, volatile double* beta,
-                        volatile double* gamma, volatile double x,
-                        volatile double y, volatile double z)
-{
-    // calculate w-z degree
-    double v, w;
-    w = (x >= 0 ? 1 : -1) * (sqrt(pow(x, 2) + pow(y, 2)));
-    v = w - g_state.length_c;
-    *alpha =
-        atan2(z, v) + acos((pow(g_state.length_a, 2) -
-                            pow(g_state.length_b, 2) + pow(v, 2) + pow(z, 2)) /
-                           2 / g_state.length_a / sqrt(pow(v, 2) + pow(z, 2)));
-    *beta = acos((pow(g_state.length_a, 2) + pow(g_state.length_b, 2) -
-                  pow(v, 2) - pow(z, 2)) /
-                 2 / g_state.length_a / g_state.length_b);
-    // calculate x-y-z degree
-    *gamma = (w >= 0) ? atan2(y, x) : atan2(-y, -x);
-
-    // trans degree pi->180
-    *alpha = *alpha / PI_CONST * 180;
-    *beta = *beta / PI_CONST * 180;
-    *gamma = *gamma / PI_CONST * 180;
-}
-
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wself-assign"
-/*
-  - trans site from polar to microservos
-  - mathematical model map to fact
-  - the errors saved in eeprom will be add
-   ---------------------------------------------------------------------------*/
-void polar_to_servo(int leg, double alpha, double beta, double gamma)
-{
-    if (leg == 0)
-    {
-        alpha = 90 - alpha;
-        beta = beta;
-        gamma += 90;
-    }
-    else if (leg == 1)
-    {
-        alpha += 90;
-        beta = 180 - beta;
-        gamma = 90 - gamma;
-    }
-    else if (leg == 2)
-
-    {
-        alpha += 90;
-        beta = 180 - beta;
-        gamma = 90 - gamma;
-    }
-    else if (leg == 3)
-    {
-        alpha = 90 - alpha;
-        beta = beta;
-        gamma += 90;
-    }
-
-    set_angle(GET_SERVO_SPEC(leg, 0), alpha);
-    set_angle(GET_SERVO_SPEC(leg, 1), beta);
-    set_angle(GET_SERVO_SPEC(leg, 2), gamma);
-}
-#pragma clang diagnostic pop
