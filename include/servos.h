@@ -5,10 +5,13 @@
 #define NB_LEGS 4
 #define JOINTS_PER_LEG 3
 
-// Standard servo period (50 Hz = 20 ms = 20,000,000 ns)
-#define SERVO_PULSE_MIN_NS 1000000UL
-#define SERVO_PULSE_MAX_NS 2000000UL
-#define SERVO_PULSE_CENTER_NS 1500000UL
+// Default values from Arduino Servo.cpp for calibration
+#define SERVO_PULSE_MIN_NS 544000  // 544 microseconds
+#define SERVO_PULSE_MAX_NS 2400000 // 2400 microseconds
+
+// The center is the average of min and max
+#define SERVO_PULSE_CENTER_NS                                                  \
+    ((SERVO_PULSE_MIN_NS + SERVO_PULSE_MAX_NS) / 2) // 1472000 ns
 
 /* Get the node ID for the parent 'pwmleds' node */
 // Macro magic for it to work (coma at the end)

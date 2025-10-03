@@ -175,6 +175,7 @@ void tcp_server_thread(void)
         k_sleep(K_SECONDS(2));
     }
 }
-
-K_THREAD_DEFINE(tcp_server_thread_id, TCP_SERVER_STACK_SIZE, tcp_server_thread,
-                NULL, NULL, NULL, TCP_SERVER_THREAD_PRIORITY, K_USER, 0);
+//
+// K_THREAD_DEFINE(tcp_server_thread_id, TCP_SERVER_STACK_SIZE,
+// tcp_server_thread,
+//                 NULL, NULL, NULL, TCP_SERVER_THREAD_PRIORITY, K_USER, 0);

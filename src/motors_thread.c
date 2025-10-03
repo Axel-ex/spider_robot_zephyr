@@ -5,7 +5,7 @@
 #include <zephyr/kernel.h>
 #include <zephyr/logging/log.h>
 
-#define MOTOR_THREAD_PRIORITY 4
+#define MOTOR_THREAD_PRIORITY 1
 #define MOTOR_THREAD_STACK_SIZE 1024
 
 LOG_MODULE_REGISTER(motors_thread, LOG_LEVEL_DBG);
@@ -22,8 +22,6 @@ void motors_thread(void)
 
     while (true)
     {
-        bool all_finished = true;
-
         if (k_mutex_lock(&g_state_mutex, K_MSEC(10)) != 0)
         {
             LOG_ERR("Fail locking the mutex");
@@ -37,41 +35,29 @@ void motors_thread(void)
                 float current_pos = g_state.site_now[leg][joint];
                 float target_pos = g_state.site_expect[leg][joint];
                 float remaining_dist = target_pos - current_pos;
-                float step_dist = g_state.temp_speed[leg][joint];
 
-                if (fabs(remaining_dist) < fabs(step_dist))
+                // Only move if not already at the target
+                if (fabs(remaining_dist) > EPSILON)
                 {
-                    g_state.site_now[leg][joint] = target_pos;
+                    float step_dist = g_state.temp_speed[leg][joint];
+
+                    // Prevent overshooting in the final step
+                    if (fabs(remaining_dist) < fabs(step_dist))
+                        g_state.site_now[leg][joint] = target_pos;
+                    else
+                        g_state.site_now[leg][joint] += step_dist;
                 }
                 else
-                {
-                    g_state.site_now[leg][joint] += step_dist;
-                    all_finished = false;
-                }
+                    g_state.site_now[leg][joint] = target_pos;
             }
             cartesian_to_polar(&alpha, &beta, &gamma, g_state.site_now[leg][0],
                                g_state.site_now[leg][1],
                                g_state.site_now[leg][2]);
-            if (isnan(alpha) || isnan(beta) || isnan(gamma))
-            {
-                LOG_ERR("IK NaN for leg %d with inputs x:%.2f, y:%.2f, z:%.2f",
-                        leg, g_state.site_now[leg][0], g_state.site_now[leg][1],
-                        g_state.site_now[leg][2]);
-                return;
-            }
             polar_to_servo(leg, alpha, beta, gamma);
         }
 
         if (k_mutex_unlock(&g_state_mutex) != 0)
             LOG_ERR("Fail unlocking the mutex");
-
-        if (all_finished)
-        {
-            if (k_sem_count_get(&motion_finished) ==
-                0) // make sure giving the sema ONLY ONCE
-                k_sem_give(&motion_finished);
-            LOG_DBG("giving the sem");
-        }
 
         k_sleep(period);
     }
