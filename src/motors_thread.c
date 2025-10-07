@@ -90,8 +90,6 @@ void cartesian_to_polar(volatile float* alpha, volatile float* beta,
     *gamma = *gamma / PI_CONST * 180;
 }
 
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wself-assign"
 /*
   - trans site from polar to microservos
   - mathematical model map to fact
@@ -102,7 +100,7 @@ void polar_to_servo(int leg, float alpha, float beta, float gamma)
     if (leg == 0)
     {
         alpha = 90 - alpha;
-        beta = beta;
+        // beta = beta;
         gamma += 90;
     }
     else if (leg == 1)
@@ -121,12 +119,12 @@ void polar_to_servo(int leg, float alpha, float beta, float gamma)
     else if (leg == 3)
     {
         alpha = 90 - alpha;
-        beta = beta;
+        // beta = beta;
         gamma += 90;
     }
 
-    set_angle(GET_SERVO_SPEC(leg, 0), alpha);
-    set_angle(GET_SERVO_SPEC(leg, 1), beta);
-    set_angle(GET_SERVO_SPEC(leg, 2), gamma);
+    // TODO: replace by PCA9685 logic
+    // set_angle(GET_SERVO_SPEC(leg, 0), alpha);
+    // set_angle(GET_SERVO_SPEC(leg, 1), beta);
+    // set_angle(GET_SERVO_SPEC(leg, 2), gamma);
 }
-#pragma clang diagnostic pop

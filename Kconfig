@@ -1,7 +1,5 @@
 # Include the base Zephyr Kconfig definitions
 rsource "$ZEPHYR_BASE/Kconfig.zephyr"
 
-
-
 # Include our Wi-Fi secrets config symbols
 rsource "Kconfig.secrets"

@@ -1,7 +1,9 @@
+#include "tcp_command.h"
 #include "zephyr/logging/log.h"
 #include "zephyr/net/net_ip.h"
 #include "zephyr/net/net_mgmt.h"
 #include <errno.h>
+#include <stdlib.h>
 #include <string.h>
 #include <zephyr/kernel.h>
 #include <zephyr/net/net_event.h>
@@ -15,6 +17,7 @@
 LOG_MODULE_REGISTER(tcp_server, LOG_LEVEL_DBG);
 K_SEM_DEFINE(wifi_connected, 0, 1);
 K_SEM_DEFINE(ipv4_obtained, 0, 1);
+K_MSGQ_DEFINE(tcp_command_q, sizeof(struct tcp_command), 5, 1);
 
 static struct net_mgmt_event_callback wifi_cb;
 static struct net_mgmt_event_callback ipv4_cb;
@@ -42,6 +45,16 @@ static void handle_ipv4_result(struct net_if* iface)
     k_sem_give(&ipv4_obtained);
 }
 
+/**
+ * @brief Network management event handler.
+ *
+ * Handles WiFi connect/disconnect and IPv4 address events.
+ * Signals semaphores on successful connection or IP acquisition.
+ *
+ * @param event_cb Event callback structure.
+ * @param mgmt_event Network management event type.
+ * @param iface Network interface pointer.
+ */
 static void net_event_handler(struct net_mgmt_event_callback* event_cb,
                               uint64_t mgmt_event, struct net_if* iface)
 {
@@ -106,9 +119,60 @@ void wifi_connect(void)
 
 // TCP_SERVER
 #define TCP_SERVER_THREAD_PRIORITY 5
-#define TCP_SERVER_STACK_SIZE 1024 // Probably will have to be bigger
+#define TCP_SERVER_STACK_SIZE 2048
 
-void handle_client(int client_socket) { return; }
+void parse_rx_buffer(char* rx_buf, int rx_len, char* command, int* times)
+{
+    // PARSE buffer
+    int i = 0;
+    while (i < rx_len && rx_buf[i] != ' ' && rx_buf[i] != '\0')
+        i++;
+
+    memcpy(command, rx_buf, i);
+
+    // Get the number after the command
+    char num[3];
+    if (rx_buf[i] == ' ')
+    {
+        int j = 0;
+        while (rx_buf[i] != '\0' && j < 3)
+            num[j++] = rx_buf[i++];
+    }
+    else
+    {
+        num[0] = '1';
+        num[1] = '\0';
+    }
+
+    *times = atoi(num);
+    LOG_DBG("Processed: %d times %s", *times, command);
+}
+
+void send_command(char* command, int times) {}
+
+void handle_client(int client_socket)
+{
+    int rx_len = 0;
+    char rx_buf[64];
+    char command[64];
+    int times = 1;
+
+    memset(rx_buf, '\0', sizeof(rx_buf));
+    rx_len = zsock_recv(client_socket, rx_buf, sizeof(rx_buf), 0);
+    if (rx_len < 0)
+    {
+        LOG_ERR("Error receiving client data");
+        return;
+    }
+    LOG_DBG("raw buffer %s", rx_buf);
+
+    parse_rx_buffer(rx_buf, rx_len, command, &times);
+    struct tcp_command cmd = {.command = command, .times = times};
+    if (k_msgq_put(&tcp_command_q, &cmd, K_NO_WAIT) < 0)
+        LOG_DBG("Message queue is full");
+
+    return;
+}
 
 void tcp_server_thread(void)
 {
@@ -175,7 +239,6 @@ void tcp_server_thread(void)
         k_sleep(K_SECONDS(2));
     }
 }
-//
-// K_THREAD_DEFINE(tcp_server_thread_id, TCP_SERVER_STACK_SIZE,
-// tcp_server_thread,
-//                 NULL, NULL, NULL, TCP_SERVER_THREAD_PRIORITY, K_USER, 0);
+
+K_THREAD_DEFINE(tcp_server_thread_id, TCP_SERVER_STACK_SIZE, tcp_server_thread,
+                NULL, NULL, NULL, TCP_SERVER_THREAD_PRIORITY, K_USER, 0);

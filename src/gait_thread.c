@@ -11,9 +11,6 @@ LOG_MODULE_REGISTER(gait_thread, LOG_LEVEL_DBG);
 
 void set_site(int leg, float x, float y, float z)
 {
-    // LOG_DBG("set_site(leg=%d) called with target (x:%.2f, y:%.2f, z:%.2f). "
-    //         "Current pos is (y:%.2f)",
-    //         leg, x, y, z, g_state.site_now[leg][1]);
     float length_x = 0, length_y = 0, length_z = 0;
 
     if (x != KEEP)
@@ -40,8 +37,7 @@ void set_site(int leg, float x, float y, float z)
 
 void gait_thread(void)
 {
-
-    // initialise the bot
+    // Initialisation
     k_mutex_lock(&g_state_mutex, K_FOREVER);
     set_site(0, g_state.x_default - g_state.x_offset,
              g_state.y_start + g_state.y_step, g_state.z_boot);
@@ -57,85 +53,62 @@ void gait_thread(void)
             g_state.site_now[leg][joint] = g_state.site_expect[leg][joint];
     k_mutex_unlock(&g_state_mutex);
 
-    print_robot_state();
+    // print_robot_state();
 
     LOG_DBG("All %zu servos are ready!", NB_SERVOS);
     k_msleep(1000);
     stand();
-    k_msleep(5000);
-    step_forward(5);
+
+    // TODO: listen for command in loop
 }
 
 K_THREAD_DEFINE(gait_thread_id, GAIT_STACK_SIZE, gait_thread, NULL, NULL, NULL,
                 GAIT_THREAD_PRIORITY, K_USER, 2000);
 
-/*
-  - wait one of end points move to expect site
-  - blocking function
-   ---------------------------------------------------------------------------*/
-void wait_reach(int leg)
+void wait_all_reach()
 {
-    while (1)
+    while (true)
     {
-        if (g_state.site_now[leg][0] == g_state.site_expect[leg][0])
-            if (g_state.site_now[leg][1] == g_state.site_expect[leg][1])
-                if (g_state.site_now[leg][2] == g_state.site_expect[leg][2])
-                    break;
+        bool motion_is_complete = true;
+
+        if (k_mutex_lock(&g_state_mutex, K_MSEC(10)) != 0)
+        {
+            LOG_ERR("wait_all_reach: Failed to lock mutex");
+            k_msleep(20); // Avoid spinning on lock failure
+            continue;
+        }
+
+        for (int leg = 0; leg < 4; leg++)
+        {
+            for (int joint = 0; joint < 3; joint++)
+            {
+                // Check if any joint is still far from its target
+                if (g_state.site_now[leg][joint] !=
+                    g_state.site_expect[leg][joint])
+                {
+                    motion_is_complete = false;
+                    break; // Exit inner loop
+                }
+            }
+            if (!motion_is_complete)
+                break; // Exit outer loop
+        }
+
+        k_mutex_unlock(&g_state_mutex);
+
+        if (motion_is_complete)
+        {
+            // All legs have reached their destination, exit the wait loop
+            return;
+        }
+
+        k_msleep(20);
     }
 }
 
-/*
-  - wait all of end points move to expect site
-  - blocking function
-   ---------------------------------------------------------------------------*/
-void wait_all_reach(void)
-{
-    for (int i = 0; i < 4; i++)
-        wait_reach(i);
-}
-
-// void wait_all_reach()
-// {
-//     // No more semaphores! This function will now poll for completion.
-//     while (true)
-//     {
-//         bool motion_is_complete = true;
-//
-//         if (k_mutex_lock(&g_state_mutex, K_MSEC(10)) != 0)
-//         {
-//             LOG_ERR("wait_all_reach: Failed to lock mutex");
-//             k_msleep(20); // Avoid spinning on lock failure
-//             continue;
-//         }
-//
-//         for (int leg = 0; leg < 4; leg++)
-//         {
-//             for (int joint = 0; joint < 3; joint++)
-//             {
-//                 // Check if any joint is still far from its target
-//                 if (g_state.site_now[leg][joint] !=
-//                     g_state.site_expect[leg][joint])
-//                 {
-//                     motion_is_complete = false;
-//                     break; // Exit inner loop
-//                 }
-//             }
-//             if (!motion_is_complete)
-//                 break; // Exit outer loop
-//         }
-//
-//         k_mutex_unlock(&g_state_mutex);
-//
-//         if (motion_is_complete)
-//         {
-//             // All legs have reached their destination, exit the wait loop
-//             return;
-//         }
-//
-//         k_msleep(20);
-//     }
-// }
-
+/*=====================================================================*
+ *                          MOVES
+ *=====================================================================*/
 void sit(void)
 {
     k_mutex_lock(&g_state_mutex, K_FOREVER);
@@ -158,7 +131,6 @@ void stand(void)
         set_site(leg, KEEP, KEEP, g_state.z_default);
     k_mutex_unlock(&g_state_mutex);
 
-    LOG_DBG("Gait thread now waiting for motion to finish...");
     wait_all_reach();
     LOG_DBG("Motion done");
 }

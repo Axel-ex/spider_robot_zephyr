@@ -3,8 +3,13 @@
 // BOTTOM_L: [26, 27, 14]
 // FRONT_R: [12, 13, 19]
 // BOTTOM_R: [18, 5, 17]
-/ {
+//
 
+&wifi {
+	status = "okay";
+};
+
+/ {
 /* Define a node for PWM-controlled LEDs */
 	pwmleds {
 		compatible = "pwm-leds";
@@ -93,10 +98,7 @@
 	channel7@7 { reg = <0x7>; timer = <0>; };
 	channel8@8 { reg = <0x8>; timer = <0>; };
 	channel9@9 { reg = <0x9>; timer = <0>; };
-	channel10@a { reg = <0xa>; timer = <0>; }; // Note: 0xA is 10 in hex
+	channel10@a { reg = <0xa>; timer = <0>; };
 	channel11@b { reg = <0xb>; timer = <0>; };
 };
 
-&wifi {
-	status = "okay";
-};
