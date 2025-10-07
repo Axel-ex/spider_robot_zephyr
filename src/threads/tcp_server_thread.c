@@ -1,3 +1,9 @@
+/*======================================================================
+ * File:    tcp_server_thread.c
+ * Date:    2025-10-07
+ * Purpose: Runs a TCP server and listens for command on port 5000 to forward to
+ *the gait thread..
+ *====================================================================*/
 #include "spider_robot.h"
 #include "zephyr/logging/log.h"
 #include "zephyr/net/net_ip.h"

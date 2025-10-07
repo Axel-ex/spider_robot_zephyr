@@ -1,3 +1,11 @@
+/*======================================================================
+ * File:    motors_thread.c
+ * Date:    2025-10-07
+ * Purpose: Shares the state with the gait thread. wakes up every 20ms on high
+ *priority and takes the appropriate steps based on the expected posisions of
+ *the legs. Perform the inverse kinematic computation to convert the x,y,z
+ *coordinates into angles.
+ *====================================================================*/
 #include "robot_state.h"
 #include "servos.h"
 #include "spider_robot.h"
