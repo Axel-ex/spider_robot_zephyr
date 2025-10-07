@@ -1,3 +1,11 @@
+/*======================================================================
+ * File:    robot_state.c
+ * Date:    2025-10-07
+ * Purpose: Global state shared by the motors and gait thread to compute the
+ *legs position and move them. The structure contains hardcoded values
+ *calculated by measuring the robot's body and variables that need run time
+ *computation.
+ *====================================================================*/
 #include "robot_state.h"
 #include "zephyr/kernel.h"
 #include <math.h>
@@ -73,8 +81,6 @@ void init_robot_state(void)
 
 /**
  * @brief Prints all fields of the global state structure for verification.
- * * Note: Uses LOG_INF level for visibility, ensuring the output is easy to
- * read.
  */
 void print_robot_state(void)
 {

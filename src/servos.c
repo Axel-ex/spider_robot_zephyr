@@ -1,3 +1,9 @@
+/*======================================================================
+ * File:    servos.c
+ * Date:    2025-10-07
+ * Purpose: Contains the code that interact with the pwm driver. All writes of
+ *pulse are done to a single interface (set_angle()).
+ *====================================================================*/
 #include "zephyr/device.h"
 #include "zephyr/drivers/pwm.h"
 #include "zephyr/logging/log.h"
@@ -11,7 +17,7 @@ LOG_MODULE_REGISTER(Servo, LOG_LEVEL_DBG);
 
 const struct device* pwm = DEVICE_DT_GET(DT_NODELABEL(pca9685));
 
-// servo_channel_map[leg_id][joint_id] = pca9685_channel;
+// servo_channel_map[leg_id][joint_id] = channel;
 static const uint8_t servo_channel_map[NB_LEGS][NB_JOINTS] = {
     //{Coxa, Femur, Tibia}
     {0, 1, 2},    // Leg 0 (FRONT_LEFT)
@@ -36,6 +42,14 @@ int init_servos(void)
     return 0;
 }
 
+/**
+ * @brief maps the angle to pulse and the servo ids to the right channel and
+ * write it.
+ *
+ * @param leg_id
+ * @param joint_id
+ * @param angle
+ */
 void set_angle(uint8_t leg_id, uint8_t joint_id, uint8_t angle)
 {
     CLAMP(angle, 0, 180);
@@ -49,6 +63,11 @@ void set_angle(uint8_t leg_id, uint8_t joint_id, uint8_t angle)
         LOG_ERR("Failed setting pwm for leg %d joint %d", leg_id, joint_id);
 }
 
+/**
+ * @brief For calibration purpose, can be run when the servos are not locked
+ * with the horn to set the robot initial positions (see:
+ * https://www.instructables.com/DIY-Spider-RobotQuad-robot-Quadruped/)
+ */
 void center_all_servos(void)
 {
     for (int leg = 0; leg < NB_LEGS; leg++)
