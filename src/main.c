@@ -10,15 +10,9 @@ LOG_MODULE_REGISTER(ServoApp, LOG_LEVEL_DBG);
 
 void main(void)
 {
-    for (int i = 0; i < NB_SERVOS; i++)
-    {
-        if (!device_is_ready(servos[i].dev))
-        {
-            LOG_ERR("Fail initiating the servos");
-            return;
-        }
-    }
     init_robot_state();
+    if (init_servos() < 0)
+        return;
 
     while (true)
     {

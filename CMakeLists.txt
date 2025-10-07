@@ -17,7 +17,6 @@ include_directories(app PRIVATE include/)
 
 zephyr_include_directories(${CMAKE_CURRENT_SOURCE_DIR})
 
-# Tell Zephyr about your custom Kconfig file
-set(KCONFIG_ROOT ${CMAKE_CURRENT_SOURCE_DIR}/Kconfig)
+# set(KCONFIG_ROOT ${CMAKE_CURRENT_SOURCE_DIR}/Kconfig)
 
 target_sources(app PRIVATE ${SRCS})
