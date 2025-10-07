@@ -42,7 +42,7 @@ void init_robot_state(void)
     g_state.z_boot = g_state.z_absolute;
 
     // Runtime calculations
-    float val_2x_l = (2.0 * g_state.x_default + g_state.length_side);
+    double val_2x_l = (2.0 * g_state.x_default + g_state.length_side);
 
     g_state.temp_a = sqrt(pow(val_2x_l, 2.0) + pow(g_state.y_step, 2.0));
 

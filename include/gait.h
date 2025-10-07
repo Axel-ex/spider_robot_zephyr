@@ -4,6 +4,11 @@
 void sit(unsigned int step);
 void stand(unsigned int step);
 void step_forward(unsigned int step);
+void turn_left(unsigned int step);
+void turn_right(unsigned int step);
+void step_back(unsigned int step);
+void hand_shake(unsigned int step);
+void hand_wave(unsigned int step);
 
 // cmd table
 struct cmd_entry
@@ -13,7 +18,9 @@ struct cmd_entry
 };
 
 static const struct cmd_entry cmd_table[] = {
-    {"sit", sit}, {"stand", stand}, {"step_forward", step_forward}};
+    {"sit", sit},          {"stand", stand},   {"step_forward", step_forward},
+    {"sb", step_back},     {"tl", turn_left},  {"tr", turn_right},
+    {"shake", hand_shake}, {"wave", hand_wave}};
 
 // motor_thread.c
 void cartesian_to_polar(volatile double* alpha, volatile double* beta,
