@@ -1,11 +1,13 @@
 #ifndef TCP_COMMAND_H
 #define TCP_COMMAND_H
 
+#define RX_BUF_SIZE 32
+
 struct tcp_command
 {
-        char* command;
+        char command[RX_BUF_SIZE];
         int times;
 };
+extern struct k_msgq tcp_command_q;
 
-struct tcp_command tcp_command_builder(char command[32], int times);
 #endif // !TCP_COMMAND_H

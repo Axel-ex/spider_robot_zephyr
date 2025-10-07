@@ -2,6 +2,7 @@
 #include "zephyr/logging/log.h"
 #include "zephyr/net/net_ip.h"
 #include "zephyr/net/net_mgmt.h"
+#include <ctype.h>
 #include <errno.h>
 #include <stdlib.h>
 #include <string.h>
@@ -125,36 +126,36 @@ void parse_rx_buffer(char* rx_buf, int rx_len, char* command, int* times)
 {
     // PARSE buffer
     int i = 0;
-    while (i < rx_len && rx_buf[i] != ' ' && rx_buf[i] != '\0')
+    while (i < rx_len && rx_buf[i] != ' ' && rx_buf[i] != '\0' &&
+           rx_buf[i] != '\r')
         i++;
 
     memcpy(command, rx_buf, i);
+    command[i] = '\0';
 
     // Get the number after the command
-    char num[3];
-    if (rx_buf[i] == ' ')
+    char num[2];
+    if (rx_buf[i] == ' ' && isdigit(rx_buf[i + 1]))
     {
+        i++;
         int j = 0;
-        while (rx_buf[i] != '\0' && j < 3)
+        while (rx_buf[i] != '\0' && j < 2)
             num[j++] = rx_buf[i++];
+        num[j] = '\0';
     }
     else
-    {
-        num[0] = '1';
-        num[1] = '\0';
-    }
+        strcpy(num, "1");
 
     *times = atoi(num);
-    LOG_DBG("Processed: %d times %s", *times, command);
+    if (*times > 10)
+        *times = 10;
 }
-
-void send_command(char* command, int times) {}
 
 void handle_client(int client_socket)
 {
     int rx_len = 0;
-    char rx_buf[64];
-    char command[64];
+    char rx_buf[RX_BUF_SIZE];
+    char command_str[RX_BUF_SIZE];
     int times = 1;
 
     memset(rx_buf, '\0', sizeof(rx_buf));
@@ -164,14 +165,48 @@ void handle_client(int client_socket)
         LOG_ERR("Error receiving client data");
         return;
     }
-    LOG_DBG("raw buffer %s", rx_buf);
 
-    parse_rx_buffer(rx_buf, rx_len, command, &times);
-    struct tcp_command cmd = {.command = command, .times = times};
+    parse_rx_buffer(rx_buf, rx_len, command_str, &times);
+    struct tcp_command cmd = {.times = times};
+    strcpy(cmd.command, command_str);
     if (k_msgq_put(&tcp_command_q, &cmd, K_NO_WAIT) < 0)
         LOG_DBG("Message queue is full");
 
     return;
+}
+
+int create_listening_socket(void)
+{
+    int listening_sock = zsock_socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
+    if (listening_sock < 0)
+    {
+        LOG_ERR("Fail creating socket (%d)", listening_sock);
+        return listening_sock;
+    }
+
+    struct sockaddr_in server_addr;
+    server_addr.sin_family = AF_INET;
+    server_addr.sin_port = htons(SERVER_PORT);
+    server_addr.sin_addr.s_addr = INADDR_ANY;
+
+    int ret = zsock_bind(listening_sock, (const struct sockaddr*)&server_addr,
+                         sizeof(server_addr));
+    if (ret < 0)
+    {
+        LOG_ERR("Failed binding the socket (%d)", errno);
+        return ret;
+    }
+
+    ret = zsock_listen(listening_sock, MAX_CLIENT_QUEUE);
+    if (ret < 0)
+    {
+        LOG_ERR("Failed to listen on socket (%d)", errno);
+        zsock_close(listening_sock);
+        return ret;
+    }
+    LOG_INF("Listening on port %d...", SERVER_PORT);
+
+    return listening_sock;
 }
 
 void tcp_server_thread(void)
@@ -189,32 +224,12 @@ void tcp_server_thread(void)
     k_sem_take(&wifi_connected, K_FOREVER);
     k_sem_take(&ipv4_obtained, K_FOREVER);
 
-    int listening_sock = zsock_socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
+    int listening_sock = create_listening_socket();
     if (listening_sock < 0)
     {
-        LOG_ERR("Fail creating socket (%d)", listening_sock);
+        LOG_ERR("Couldn't start the tcp server");
         return;
     }
-
-    struct sockaddr_in server_addr;
-    server_addr.sin_family = AF_INET;
-    server_addr.sin_port = htons(SERVER_PORT);
-    server_addr.sin_addr.s_addr = INADDR_ANY;
-
-    if (zsock_bind(listening_sock, (const struct sockaddr*)&server_addr,
-                   sizeof(server_addr)) < 0)
-    {
-        LOG_ERR("Failed binding the socket (%d)", errno);
-        return;
-    }
-
-    if (zsock_listen(listening_sock, MAX_CLIENT_QUEUE) < 0)
-    {
-        LOG_ERR("Failed to listen on socket (%d)", errno);
-        zsock_close(listening_sock);
-        return;
-    }
-    LOG_INF("Listening on port %d...", SERVER_PORT);
 
     int client_sock = -1;
     while (true)
@@ -227,7 +242,7 @@ void tcp_server_thread(void)
             if (client_sock < 0)
             {
                 LOG_ERR("Failed to accept client (%d)", errno);
-                k_sleep(K_SECONDS(1));
+                k_sleep(K_MSEC(200));
                 continue;
             }
             LOG_INF("Client accepted!");
@@ -236,7 +251,7 @@ void tcp_server_thread(void)
             client_sock = -1;
         }
 
-        k_sleep(K_SECONDS(2));
+        k_sleep(K_MSEC(500));
     }
 }
 

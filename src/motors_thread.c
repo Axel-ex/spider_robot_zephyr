@@ -17,7 +17,7 @@ K_SEM_DEFINE(motion_finished, 0, 1);
  */
 void motors_thread(void)
 {
-    static float alpha, beta, gamma;
+    static double alpha, beta, gamma;
     k_timeout_t period = K_MSEC(20);
 
     while (true)
@@ -32,14 +32,14 @@ void motors_thread(void)
         {
             for (int joint = 0; joint < 3; joint++)
             {
-                float current_pos = g_state.site_now[leg][joint];
-                float target_pos = g_state.site_expect[leg][joint];
-                float remaining_dist = target_pos - current_pos;
+                double current_pos = g_state.site_now[leg][joint];
+                double target_pos = g_state.site_expect[leg][joint];
+                double remaining_dist = target_pos - current_pos;
 
                 // Only move if not already at the target
                 if (fabs(remaining_dist) > EPSILON)
                 {
-                    float step_dist = g_state.temp_speed[leg][joint];
+                    double step_dist = g_state.temp_speed[leg][joint];
 
                     // Prevent overshooting in the final step
                     if (fabs(remaining_dist) < fabs(step_dist))
@@ -66,12 +66,12 @@ void motors_thread(void)
 K_THREAD_DEFINE(motor_thread_id, MOTOR_THREAD_STACK_SIZE, motors_thread, NULL,
                 NULL, NULL, MOTOR_THREAD_PRIORITY, K_USER, 0);
 
-void cartesian_to_polar(volatile float* alpha, volatile float* beta,
-                        volatile float* gamma, volatile float x,
-                        volatile float y, volatile float z)
+void cartesian_to_polar(volatile double* alpha, volatile double* beta,
+                        volatile double* gamma, volatile double x,
+                        volatile double y, volatile double z)
 {
     // calculate w-z degree
-    float v, w;
+    double v, w;
     w = (x >= 0 ? 1 : -1) * (sqrt(pow(x, 2) + pow(y, 2)));
     v = w - g_state.length_c;
     *alpha =
@@ -95,7 +95,7 @@ void cartesian_to_polar(volatile float* alpha, volatile float* beta,
   - mathematical model map to fact
   - the errors saved in eeprom will be add
    ---------------------------------------------------------------------------*/
-void polar_to_servo(int leg, float alpha, float beta, float gamma)
+void polar_to_servo(int leg, double alpha, double beta, double gamma)
 {
     if (leg == 0)
     {

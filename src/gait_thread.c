@@ -1,17 +1,21 @@
 #include "gait.h"
 #include "robot_state.h"
 #include "servos.h"
+#include "tcp_command.h"
 #include "zephyr/kernel.h"
+#include "zephyr/sys/util.h"
 #include <math.h>
+#include <string.h>
+#include <sys/_types.h>
 #include <zephyr/logging/log.h>
 
 LOG_MODULE_REGISTER(gait_thread, LOG_LEVEL_DBG);
 #define GAIT_STACK_SIZE 1024
 #define GAIT_THREAD_PRIORITY 5
 
-void set_site(int leg, float x, float y, float z)
+void set_site(int leg, double x, double y, double z)
 {
-    float length_x = 0, length_y = 0, length_z = 0;
+    double length_x = 0, length_y = 0, length_z = 0;
 
     if (x != KEEP)
         length_x = x - g_state.site_now[leg][0];
@@ -20,9 +24,10 @@ void set_site(int leg, float x, float y, float z)
     if (z != KEEP)
         length_z = z - g_state.site_now[leg][2];
 
-    float length = sqrt(pow(length_x, 2) + pow(length_y, 2) + pow(length_z, 2));
+    double length =
+        sqrt(pow(length_x, 2) + pow(length_y, 2) + pow(length_z, 2));
 
-    float speed_factor = g_state.move_speed * g_state.speed_multiple / length;
+    double speed_factor = g_state.move_speed * g_state.speed_multiple / length;
     g_state.temp_speed[leg][0] = length_x * speed_factor;
     g_state.temp_speed[leg][1] = length_y * speed_factor;
     g_state.temp_speed[leg][2] = length_z * speed_factor;
@@ -33,6 +38,19 @@ void set_site(int leg, float x, float y, float z)
         g_state.site_expect[leg][1] = y;
     if (z != KEEP)
         g_state.site_expect[leg][2] = z;
+}
+
+void process_tcp_command(const struct tcp_command* cmd)
+{
+    for (int i = 0; i < ARRAY_SIZE(cmd_table); i++)
+    {
+        if (strcmp(cmd->command, cmd_table[i].name) == 0)
+        {
+            cmd_table[i].fn(cmd->times);
+            return;
+        }
+    }
+    LOG_WRN("Unrecognised command %s", cmd->command);
 }
 
 void gait_thread(void)
@@ -53,13 +71,18 @@ void gait_thread(void)
             g_state.site_now[leg][joint] = g_state.site_expect[leg][joint];
     k_mutex_unlock(&g_state_mutex);
 
-    // print_robot_state();
-
     LOG_DBG("All %zu servos are ready!", NB_SERVOS);
     k_msleep(1000);
-    stand();
+    stand(0);
 
-    // TODO: listen for command in loop
+    while (true)
+    {
+        struct tcp_command cmd;
+
+        k_msgq_get(&tcp_command_q, &cmd, K_FOREVER);
+        LOG_DBG("Received: command: %s, times: %d", cmd.command, cmd.times);
+        process_tcp_command(&cmd);
+    }
 }
 
 K_THREAD_DEFINE(gait_thread_id, GAIT_STACK_SIZE, gait_thread, NULL, NULL, NULL,
@@ -109,8 +132,10 @@ void wait_all_reach()
 /*=====================================================================*
  *                          MOVES
  *=====================================================================*/
-void sit(void)
+void sit(unsigned int step)
 {
+    (void)step;
+
     k_mutex_lock(&g_state_mutex, K_FOREVER);
     g_state.move_speed = g_state.stand_seat_speed;
     for (int leg = 0; leg < 4; leg++)
@@ -122,8 +147,9 @@ void sit(void)
     LOG_DBG("Motion done");
 }
 
-void stand(void)
+void stand(unsigned int step)
 {
+    (void)step;
 
     k_mutex_lock(&g_state_mutex, K_FOREVER);
     g_state.move_speed = g_state.stand_seat_speed;
@@ -132,12 +158,11 @@ void stand(void)
     k_mutex_unlock(&g_state_mutex);
 
     wait_all_reach();
-    LOG_DBG("Motion done");
 }
 
 void step_forward(unsigned int step)
 {
-    float local_leg_move_speed, local_body_move_speed;
+    double local_leg_move_speed, local_body_move_speed;
 
     k_mutex_lock(&g_state_mutex, K_FOREVER);
     local_leg_move_speed = g_state.leg_move_speed;
@@ -288,6 +313,185 @@ void step_forward(unsigned int step)
             // Place leg 3 down
             k_mutex_lock(&g_state_mutex, K_FOREVER);
             set_site(3, g_state.x_default + g_state.x_offset, g_state.y_start,
+                     g_state.z_default);
+            k_mutex_unlock(&g_state_mutex);
+            wait_all_reach();
+        }
+    }
+}
+
+void turn_left(unsigned int step)
+
+{
+    // Copy speed to a local variable for consistency throughout the gait cycle
+
+    double local_spot_turn_speed;
+    k_mutex_lock(&g_state_mutex, K_FOREVER);
+    // Assuming g_state has a spot_turn_speed field, similar to the original
+    local_spot_turn_speed = g_state.spot_turn_speed;
+    k_mutex_unlock(&g_state_mutex);
+
+    while (step-- > 0)
+    {
+        // Check which phase of the gait we are in, using a tolerance
+        k_mutex_lock(&g_state_mutex, K_FOREVER);
+        bool leg_3_is_home =
+
+            (fabs(g_state.site_now[3][1] - g_state.y_start) < EPSILON);
+        k_mutex_unlock(&g_state_mutex);
+
+        if (leg_3_is_home)
+
+        {
+            /*********************************/
+
+            /* Phase 1: Move Legs 3 & 1      */
+            /*********************************/
+
+            // Lift leg 3
+            k_mutex_lock(&g_state_mutex, K_FOREVER);
+            g_state.move_speed = local_spot_turn_speed;
+            set_site(3, g_state.x_default + g_state.x_offset, g_state.y_start,
+                     g_state.z_up);
+            k_mutex_unlock(&g_state_mutex);
+            wait_all_reach();
+
+            // First turn shift (while leg 3 is up)
+            k_mutex_lock(&g_state_mutex, K_FOREVER);
+            set_site(0, g_state.turn_x1 - g_state.x_offset, g_state.turn_y1,
+                     g_state.z_default);
+
+            set_site(1, g_state.turn_x0 - g_state.x_offset, g_state.turn_y0,
+                     g_state.z_default);
+            set_site(2, g_state.turn_x1 + g_state.x_offset, g_state.turn_y1,
+                     g_state.z_default);
+            set_site(3, g_state.turn_x0 + g_state.x_offset, g_state.turn_y0,
+                     g_state.z_up);
+            k_mutex_unlock(&g_state_mutex);
+            wait_all_reach();
+
+            // Place leg 3 down
+            k_mutex_lock(&g_state_mutex, K_FOREVER);
+            set_site(3, g_state.turn_x0 + g_state.x_offset, g_state.turn_y0,
+                     g_state.z_default);
+            k_mutex_unlock(&g_state_mutex);
+            wait_all_reach();
+
+            // Second turn shift (all legs on the ground)
+            k_mutex_lock(&g_state_mutex, K_FOREVER);
+            set_site(0, g_state.turn_x1 + g_state.x_offset, g_state.turn_y1,
+                     g_state.z_default);
+            set_site(1, g_state.turn_x0 + g_state.x_offset, g_state.turn_y0,
+                     g_state.z_default);
+            set_site(2, g_state.turn_x1 - g_state.x_offset, g_state.turn_y1,
+                     g_state.z_default);
+            set_site(3, g_state.turn_x0 - g_state.x_offset, g_state.turn_y0,
+                     g_state.z_default);
+
+            k_mutex_unlock(&g_state_mutex);
+            wait_all_reach();
+
+            // Lift leg 1
+            k_mutex_lock(&g_state_mutex, K_FOREVER);
+
+            set_site(1, g_state.turn_x0 + g_state.x_offset, g_state.turn_y0,
+                     g_state.z_up);
+            k_mutex_unlock(&g_state_mutex);
+            wait_all_reach();
+
+            // Body shift to return leg 1 to home position
+            k_mutex_lock(&g_state_mutex, K_FOREVER);
+            set_site(0, g_state.x_default + g_state.x_offset, g_state.y_start,
+                     g_state.z_default);
+            set_site(1, g_state.x_default + g_state.x_offset, g_state.y_start,
+                     g_state.z_up);
+            set_site(2, g_state.x_default - g_state.x_offset,
+                     g_state.y_start + g_state.y_step, g_state.z_default);
+            set_site(3, g_state.x_default - g_state.x_offset,
+                     g_state.y_start + g_state.y_step, g_state.z_default);
+
+            k_mutex_unlock(&g_state_mutex);
+            wait_all_reach();
+
+            // Place leg 1 down
+            k_mutex_lock(&g_state_mutex, K_FOREVER);
+            set_site(1, g_state.x_default + g_state.x_offset, g_state.y_start,
+                     g_state.z_default);
+            k_mutex_unlock(&g_state_mutex);
+            wait_all_reach();
+        }
+        else
+        {
+            /*********************************/
+            /* Phase 2: Move Legs 0 & 2      */
+            /*********************************/
+
+            // Lift leg 0
+
+            k_mutex_lock(&g_state_mutex, K_FOREVER);
+            g_state.move_speed = local_spot_turn_speed;
+            set_site(0, g_state.x_default + g_state.x_offset, g_state.y_start,
+                     g_state.z_up);
+            k_mutex_unlock(&g_state_mutex);
+            wait_all_reach();
+
+            // First turn shift (while leg 0 is up)
+            k_mutex_lock(&g_state_mutex, K_FOREVER);
+            set_site(0, g_state.turn_x0 + g_state.x_offset, g_state.turn_y0,
+                     g_state.z_up);
+            set_site(1, g_state.turn_x1 + g_state.x_offset, g_state.turn_y1,
+                     g_state.z_default);
+            set_site(2, g_state.turn_x0 - g_state.x_offset, g_state.turn_y0,
+                     g_state.z_default);
+            set_site(3, g_state.turn_x1 - g_state.x_offset, g_state.turn_y1,
+                     g_state.z_default);
+            k_mutex_unlock(&g_state_mutex);
+            wait_all_reach();
+
+            // Place leg 0 down
+            k_mutex_lock(&g_state_mutex, K_FOREVER);
+            set_site(0, g_state.turn_x0 + g_state.x_offset, g_state.turn_y0,
+                     g_state.z_default);
+
+            k_mutex_unlock(&g_state_mutex);
+            wait_all_reach();
+
+            // Second turn shift (all legs on the ground)
+            k_mutex_lock(&g_state_mutex, K_FOREVER);
+            set_site(0, g_state.turn_x0 - g_state.x_offset, g_state.turn_y0,
+                     g_state.z_default);
+            set_site(1, g_state.turn_x1 - g_state.x_offset, g_state.turn_y1,
+                     g_state.z_default);
+            set_site(2, g_state.turn_x0 + g_state.x_offset, g_state.turn_y0,
+                     g_state.z_default);
+            set_site(3, g_state.turn_x1 + g_state.x_offset, g_state.turn_y1,
+                     g_state.z_default);
+            k_mutex_unlock(&g_state_mutex);
+            wait_all_reach();
+
+            // Lift leg 2
+            k_mutex_lock(&g_state_mutex, K_FOREVER);
+            set_site(2, g_state.turn_x0 + g_state.x_offset, g_state.turn_y0,
+                     g_state.z_up);
+            k_mutex_unlock(&g_state_mutex);
+            wait_all_reach();
+
+            // Body shift to return leg 2 to home position
+            k_mutex_lock(&g_state_mutex, K_FOREVER);
+            set_site(0, g_state.x_default - g_state.x_offset,
+                     g_state.y_start + g_state.y_step, g_state.z_default);
+            set_site(1, g_state.x_default - g_state.x_offset,
+                     g_state.y_start + g_state.y_step, g_state.z_default);
+            set_site(2, g_state.x_default + g_state.x_offset, g_state.y_start,
+                     g_state.z_up);
+            set_site(3, g_state.x_default + g_state.x_offset, g_state.y_start,
+                     g_state.z_default);
+            k_mutex_unlock(&g_state_mutex);
+            wait_all_reach();
+
+            // Place leg 2 down
+            k_mutex_lock(&g_state_mutex, K_FOREVER);
+            set_site(2, g_state.x_default + g_state.x_offset, g_state.y_start,
                      g_state.z_default);
             k_mutex_unlock(&g_state_mutex);
             wait_all_reach();

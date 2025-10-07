@@ -5,8 +5,8 @@
 #include <zephyr/logging/log.h>
 
 LOG_MODULE_REGISTER(robot_state, LOG_LEVEL_DBG);
-const float PI_CONST = 3.1415926;
-const float KEEP = 255.0;
+const double PI_CONST = 3.1415926;
+const double KEEP = 255.0;
 K_MUTEX_DEFINE(g_state_mutex);
 
 /**
