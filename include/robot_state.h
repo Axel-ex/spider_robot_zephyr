@@ -44,11 +44,10 @@ typedef struct robot_state_t
         double stand_seat_speed;
 
         // --- MUTABLE STATE (Volatile variables used by Control Thread) ---
-        volatile double site_now[4][3];    // Real-time coordinates
-        volatile double site_expect[4][3]; // Expected coordinates
+         double site_now[4][3];    // Real-time coordinates
+         double site_expect[4][3]; // Expected coordinates
 
         double temp_speed[4][3]; // Each axis' speed
-        volatile int rest_counter;
         double move_speed;
 
         // Marker to ensure initialization has run

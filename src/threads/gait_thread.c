@@ -11,6 +11,11 @@ LOG_MODULE_REGISTER(gait_thread, LOG_LEVEL_DBG);
 #define GAIT_STACK_SIZE 1024
 #define GAIT_THREAD_PRIORITY 5
 
+static const struct cmd_entry cmd_table[] = {
+    {"sit", sit},          {"stand", stand},   {"sf", step_forward},
+    {"sb", step_back},     {"tl", turn_left},  {"tr", turn_right},
+    {"shake", hand_shake}, {"wave", hand_wave}};
+
 void set_site(int leg, double x, double y, double z)
 {
     double length_x = 0, length_y = 0, length_z = 0;
@@ -64,12 +69,11 @@ void gait_thread(void)
     set_site(3, g_state.x_default + g_state.x_offset, g_state.y_start,
              g_state.z_boot);
 
-    for (int leg = 0; leg < 4; leg++)
-        for (int joint = 0; joint < 3; joint++)
+    for (int leg = 0; leg < NB_LEGS; leg++)
+        for (int joint = 0; joint < NB_JOINTS; joint++)
             g_state.site_now[leg][joint] = g_state.site_expect[leg][joint];
     k_mutex_unlock(&g_state_mutex);
 
-    LOG_DBG("All %zu servos are ready!", NB_SERVOS);
     k_msleep(1000);
     stand(0);
 
@@ -95,24 +99,23 @@ void wait_all_reach(void)
         if (k_mutex_lock(&g_state_mutex, K_MSEC(10)) != 0)
         {
             LOG_ERR("wait_all_reach: Failed to lock mutex");
-            k_msleep(20); // Avoid spinning on lock failure
+            k_msleep(20);
             continue;
         }
 
-        for (int leg = 0; leg < 4; leg++)
+        for (int leg = 0; leg < NB_LEGS; leg++)
         {
-            for (int joint = 0; joint < 3; joint++)
+            for (int joint = 0; joint < NB_JOINTS; joint++)
             {
-                // Check if any joint is still far from its target
                 if (g_state.site_now[leg][joint] !=
                     g_state.site_expect[leg][joint])
                 {
                     motion_is_complete = false;
-                    break; // Exit inner loop
+                    break;
                 }
             }
             if (!motion_is_complete)
-                break; // Exit outer loop
+                break;
         }
 
         k_mutex_unlock(&g_state_mutex);

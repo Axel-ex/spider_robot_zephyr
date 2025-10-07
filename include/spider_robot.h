@@ -22,11 +22,6 @@ struct cmd_entry
         void (*fn)(unsigned int step);
 };
 
-static const struct cmd_entry cmd_table[] = {
-    {"sit", sit},          {"stand", stand},   {"sf", step_forward},
-    {"sb", step_back},     {"tl", turn_left},  {"tr", turn_right},
-    {"shake", hand_shake}, {"wave", hand_wave}};
-
 /*=====================================================================*
  *                          TCP command
  *=====================================================================*/
@@ -42,9 +37,8 @@ extern struct k_msgq tcp_command_q;
 /*=====================================================================*
  *                           Kinematics
  *=====================================================================*/
-void cartesian_to_polar(volatile double* alpha, volatile double* beta,
-                        volatile double* gamma, volatile double x,
-                        volatile double y, volatile double z);
+void cartesian_to_polar(double* alpha, double* beta, double* gamma, double x,
+                        double y, double z);
 void polar_to_servo(int leg, double alpha, double beta, double gamma);
 
 #endif // !GAIT
