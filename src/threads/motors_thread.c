@@ -1,6 +1,6 @@
-#include "gait.h"
 #include "robot_state.h"
 #include "servos.h"
+#include "spider_robot.h"
 #include <math.h>
 #include <zephyr/kernel.h>
 #include <zephyr/logging/log.h>

@@ -1,9 +1,10 @@
-#include "tcp_command.h"
+#include "spider_robot.h"
 #include "zephyr/logging/log.h"
 #include "zephyr/net/net_ip.h"
 #include "zephyr/net/net_mgmt.h"
 #include <ctype.h>
 #include <errno.h>
+#include <stddef.h>
 #include <stdlib.h>
 #include <string.h>
 #include <zephyr/kernel.h>
@@ -125,7 +126,7 @@ void wifi_connect(void)
 void parse_rx_buffer(char* rx_buf, int rx_len, char* command, int* times)
 {
     // PARSE buffer
-    int i = 0;
+    size_t i = 0;
     while (i < rx_len && rx_buf[i] != ' ' && rx_buf[i] != '\0' &&
            rx_buf[i] != '\r')
         i++;
@@ -138,7 +139,7 @@ void parse_rx_buffer(char* rx_buf, int rx_len, char* command, int* times)
     if (rx_buf[i] == ' ' && isdigit(rx_buf[i + 1]))
     {
         i++;
-        int j = 0;
+        size_t j = 0;
         while (rx_buf[i] != '\0' && j < 2)
             num[j++] = rx_buf[i++];
         num[j] = '\0';
