@@ -55,9 +55,6 @@ void gait_thread(void)
             g_state.site_now[leg][joint] = g_state.site_expect[leg][joint];
     k_mutex_unlock(&g_state_mutex);
 
-    k_msleep(1000);
-    stand(0);
-
     while (true)
     {
         struct tcp_command cmd;

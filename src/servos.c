@@ -19,7 +19,7 @@ const struct device* pwm = DEVICE_DT_GET(DT_NODELABEL(pca9685));
 
 // servo_channel_map[leg_id][joint_id] = channel;
 static const uint8_t servo_channel_map[NB_LEGS][NB_JOINTS] = {
-    //{Coxa, Femur, Tibia}
+    //{femur, tibia, coxa}
     {0, 1, 2},    // Leg 0 (FRONT_LEFT)
     {3, 4, 5},    // Leg 1 (BOTTOM_LEFT)
     {6, 7, 8},    // Leg 2 (FRONT_RIGHT)

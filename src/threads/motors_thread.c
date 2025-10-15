@@ -45,19 +45,13 @@ void motors_thread(void)
                 double target_pos = g_state.site_expect[leg][joint];
                 double remaining_dist = target_pos - current_pos;
 
-                // Only move if not already at the target
-                if (fabs(remaining_dist) > EPSILON)
-                {
-                    double step_dist = g_state.temp_speed[leg][joint];
+                double step_dist = g_state.temp_speed[leg][joint];
 
-                    // Prevent overshooting in the final step
-                    if (fabs(remaining_dist) < fabs(step_dist))
-                        g_state.site_now[leg][joint] = target_pos;
-                    else
-                        g_state.site_now[leg][joint] += step_dist;
-                }
-                else
+                // Prevent overshooting in the final step
+                if (fabs(remaining_dist) < fabs(step_dist))
                     g_state.site_now[leg][joint] = target_pos;
+                else
+                    g_state.site_now[leg][joint] += step_dist;
             }
             cartesian_to_polar(&alpha, &beta, &gamma, g_state.site_now[leg][0],
                                g_state.site_now[leg][1],

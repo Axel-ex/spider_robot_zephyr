@@ -3,9 +3,9 @@
  */
 &i2c0 {
 	/* Declare the PCA9685 device on the I2C bus */
-	pca9685: pca9685@40 {
+	pca9685: pca9685@7f {
 		compatible = "nxp,pca9685-pwm";
-		reg = <0x40>; /* PCA9685 defaults I2C address */
+		reg = <0x7f>; /* PCA9685 defaults I2C address */
 		#pwm-cells = <2>;
 		label = "PCA9685_0";
 	};
