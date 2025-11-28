@@ -165,21 +165,25 @@ void handle_client(int client_socket)
     char command_str[RX_BUF_SIZE];
     int times = 1;
 
-    memset(rx_buf, '\0', sizeof(rx_buf));
-    rx_len = zsock_recv(client_socket, rx_buf, sizeof(rx_buf), 0);
-    if (rx_len < 0)
+    while (true)
     {
-        LOG_ERR("Error receiving client data");
-        return;
+        memset(rx_buf, '\0', sizeof(rx_buf));
+        rx_len = zsock_recv(client_socket, rx_buf, sizeof(rx_buf), 0);
+        if (rx_len < 0)
+        {
+            LOG_ERR("Error receiving client data");
+            break;
+        }
+
+        parse_rx_buffer(rx_buf, rx_len, command_str, &times);
+        struct tcp_command cmd = {.times = times};
+        strcpy(cmd.command, command_str);
+        if (strcmp(command_str, "close") ==
+            0) // break if the client request closing connection
+            break;
+        if (k_msgq_put(&tcp_command_q, &cmd, K_NO_WAIT) < 0)
+            LOG_DBG("Message queue is full");
     }
-
-    parse_rx_buffer(rx_buf, rx_len, command_str, &times);
-    struct tcp_command cmd = {.times = times};
-    strcpy(cmd.command, command_str);
-    if (k_msgq_put(&tcp_command_q, &cmd, K_NO_WAIT) < 0)
-        LOG_DBG("Message queue is full");
-
-    return;
 }
 
 int create_listening_socket(void)

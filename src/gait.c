@@ -75,7 +75,6 @@ void wait_all_reach(void)
 
         k_msleep(2); // WARN: how frequent should this be checked
     }
-    LOG_DBG("Motion done");
 }
 
 void sit(unsigned int step)
